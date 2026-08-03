@@ -107,7 +107,7 @@ export default function RegistrationForm({ onSuccess }) {
           </span>
           <div>
             <h2 className="text-xl font-bold leading-tight text-brand-navy">Event Registration</h2>
-            <p className="text-xs text-slate-500">Fill in your details to register</p>
+            <p className="text-xs text-slate-500">Fill  your details to register</p>
           </div>
         </div>
 
