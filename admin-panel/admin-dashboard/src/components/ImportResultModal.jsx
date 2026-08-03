@@ -15,7 +15,7 @@ export default function ImportResultModal({ result, onClose }) {
       <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <h2 className="text-base font-bold text-brand-navyDark">Import Summary</h2>
-          <button onClick={onClose} className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100" aria-label="Close">
+          <button onClick={onClose} className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 cursor-pointer" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -65,7 +65,7 @@ export default function ImportResultModal({ result, onClose }) {
 
           <button
             onClick={onClose}
-            className="w-full rounded-lg bg-brand-navy py-2.5 text-sm font-semibold text-white"
+            className="w-full rounded-lg bg-brand-navy py-2.5 text-sm font-semibold text-white cursor-pointer"
           >
             Done
           </button>

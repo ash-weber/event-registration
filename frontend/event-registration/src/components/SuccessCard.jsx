@@ -114,7 +114,7 @@ export default function SuccessCard({ data, onViewQr, onReset }) {
             <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
               <button
                 onClick={onViewQr}
-                className="group/btn flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-navy to-blue-700 py-2.5 text-sm font-semibold text-white transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-900/30 hover:brightness-110 active:scale-[0.98]"
+                className="group/btn flex flex-1 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-navy to-blue-700 py-2.5 text-sm font-semibold text-white transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-900/30 hover:brightness-110 active:scale-[0.98] cursor-pointer"
               >
                 <QrCode size={16} /> View QR Pass
                 <ArrowRight size={16} className="transition-transform duration-300 group-hover/btn:translate-x-0.5" />
@@ -122,7 +122,7 @@ export default function SuccessCard({ data, onViewQr, onReset }) {
 
               <button
                 onClick={onReset}
-                className="group/btn flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm font-semibold text-slate-600 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-blue-200 hover:bg-slate-50 hover:text-brand-navy active:scale-[0.98]"
+                className="group/btn flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 py-2 text-sm font-semibold text-slate-600 transition-all duration-300 ease-out hover:scale-[1.02] hover:border-blue-200 hover:bg-slate-50 hover:text-brand-navy active:scale-[0.98] cursor-pointer"
               >
                 <RotateCcw size={16} className="transition-transform duration-500 group-hover/btn:rotate-180" /> Register Another
               </button>

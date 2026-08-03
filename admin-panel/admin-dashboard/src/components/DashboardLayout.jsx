@@ -90,7 +90,7 @@ export default function DashboardLayout() {
           <div className="flex min-w-0 items-center gap-3">
             <button
               onClick={() => setMobileOpen(true)}
-              className="flex flex-shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:border-slate-300 hover:bg-slate-50 lg:hidden"
+              className="flex flex-shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:border-slate-300 hover:bg-slate-50 cursor-pointer lg:hidden"
               aria-label="Open menu"
             >
               <Menu size={20} />
@@ -143,7 +143,7 @@ function DateRangePicker({ value, onChange }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm font-medium text-slate-600 shadow-sm hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 sm:gap-2 sm:px-3"
+        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm font-medium text-slate-600 shadow-sm hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 cursor-pointer sm:gap-2 sm:px-3"
       >
         <CalendarDays size={16} className="text-slate-400" />
         <span className="hidden sm:inline">{current.label}</span>
@@ -160,7 +160,7 @@ function DateRangePicker({ value, onChange }) {
                 onChange(opt.value);
                 setOpen(false);
               }}
-              className={`block w-full px-3 py-2 text-left text-sm ${
+              className={`block w-full px-3 py-2 text-left text-sm cursor-pointer ${
                 opt.value === value
                   ? 'bg-[#eef2ff] font-medium text-[#1e3a8a]'
                   : 'text-slate-600 hover:bg-slate-50'
@@ -193,7 +193,7 @@ function SidebarContent({ onLogout, onNavigate, onClose, admin }) {
         {onClose && (
           <button
             onClick={onClose}
-            className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white lg:hidden"
+            className="rounded-md p-1.5 text-white/70 hover:bg-white/10 hover:text-white cursor-pointer lg:hidden"
             aria-label="Close menu"
           >
             <X size={20} />
@@ -215,7 +215,7 @@ function SidebarContent({ onLogout, onNavigate, onClose, admin }) {
             end={to === '/'}
             onClick={onNavigate}
             className={({ isActive }) =>
-              `group relative flex items-center gap-3 rounded-lg py-2.5 pl-4 pr-3 text-sm font-medium transition-colors ${
+              `group relative flex items-center gap-3 rounded-lg py-2.5 pl-4 pr-3 text-sm font-medium transition-colors cursor-pointer ${
                 isActive ? 'bg-white/[0.07] text-white' : 'text-white/60 hover:bg-white/[0.05] hover:text-white'
               }`
             }
@@ -256,7 +256,7 @@ function SidebarContent({ onLogout, onNavigate, onClose, admin }) {
       <div className="relative px-4 pb-6">
         <button
           onClick={onLogout}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/95 px-3 py-2.5 text-sm font-medium text-red-500 shadow-sm backdrop-blur hover:bg-white"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/95 px-3 py-2.5 text-sm font-medium text-red-500 shadow-sm backdrop-blur hover:bg-white cursor-pointer"
         >
           <LogOut size={18} />
           Log Out

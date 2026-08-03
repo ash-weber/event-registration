@@ -271,7 +271,7 @@ export default function VisitorsListPage() {
             <button
               type="button"
               onClick={() => setStatusOpen((o) => !o)}
-              className="flex items-center gap-2 rounded-lg border bg-white py-2 pl-2.5 pr-3 text-xs font-semibold shadow-sm transition"
+              className="flex items-center gap-2 rounded-lg border bg-white py-2 pl-2.5 pr-3 text-xs font-semibold shadow-sm transition cursor-pointer"
               style={{ borderColor: statusOpen ? `${statusFilter.color}66` : '#e2e8f0' }}
             >
               <span
@@ -301,7 +301,7 @@ export default function VisitorsListPage() {
                         setStatusFilter(opt);
                         setStatusOpen(false);
                       }}
-                      className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-xs transition"
+                      className="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-xs transition cursor-pointer"
                       style={isActive ? { backgroundColor: `${opt.color}14` } : undefined}
                       onMouseEnter={(e) => {
                         if (!isActive) e.currentTarget.style.backgroundColor = '#f8fafc';
@@ -335,7 +335,7 @@ export default function VisitorsListPage() {
             <button
               type="button"
               onClick={() => setExportOpen((o) => !o)}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-white shadow-sm"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-white shadow-sm cursor-pointer"
               style={{ backgroundColor: NAVY }}
             >
               <Download size={13} />
@@ -348,7 +348,7 @@ export default function VisitorsListPage() {
                   type="button"
                   onClick={() => handleExport('csv')}
                   disabled={exporting !== null}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
                 >
                   {exporting === 'csv' ? (
                     <Loader2 size={14} className="animate-spin" />
@@ -361,7 +361,7 @@ export default function VisitorsListPage() {
                   type="button"
                   onClick={() => handleExport('excel')}
                   disabled={exporting !== null}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-slate-600 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
                 >
                   {exporting === 'excel' ? (
                     <Loader2 size={14} className="animate-spin" />
@@ -388,7 +388,7 @@ export default function VisitorsListPage() {
           <button
             type="button"
             onClick={() => setStatusFilter(STATUS_OPTIONS[0])}
-            className="text-[11px] font-medium text-slate-400 underline"
+            className="text-[11px] font-medium text-slate-400 underline cursor-pointer"
           >
             Clear
           </button>
@@ -441,7 +441,7 @@ export default function VisitorsListPage() {
                       <button
                         type="button"
                         onClick={() => setActiveVisitorId(v.id)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border cursor-pointer"
                         style={{ borderColor: `${GREEN}88`, color: '#5c9e1f' }}
                         aria-label={`View ${v.fullName}`}
                       >
@@ -451,7 +451,7 @@ export default function VisitorsListPage() {
                         type="button"
                         onClick={(e) => handleDownload(v.id, e)}
                         disabled={downloadingId === v.id}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border disabled:opacity-50"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg border disabled:opacity-50 cursor-pointer"
                         style={{ borderColor: `${NAVY}55`, color: NAVY }}
                         aria-label={`Download QR for ${v.fullName}`}
                       >
@@ -506,7 +506,7 @@ export default function VisitorsListPage() {
                           <button
                             type="button"
                             onClick={() => setActiveVisitorId(v.id)}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border"
+                            className="flex h-7 w-7 items-center justify-center rounded-lg border cursor-pointer"
                             style={{ borderColor: `${GREEN}88`, color: '#5c9e1f' }}
                             aria-label={`View ${v.fullName}`}
                           >
@@ -516,7 +516,7 @@ export default function VisitorsListPage() {
                             type="button"
                             onClick={(e) => handleDownload(v.id, e)}
                             disabled={downloadingId === v.id}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border disabled:opacity-50"
+                            className="flex h-7 w-7 items-center justify-center rounded-lg border disabled:opacity-50 cursor-pointer"
                             style={{ borderColor: `${NAVY}55`, color: NAVY }}
                             aria-label={`Download QR for ${v.fullName}`}
                           >
@@ -547,7 +547,7 @@ export default function VisitorsListPage() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
               aria-label="Previous page"
             >
               <ChevronLeft size={14} />
@@ -562,7 +562,7 @@ export default function VisitorsListPage() {
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className="flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold transition"
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold transition cursor-pointer"
                   style={
                     p === page
                       ? { backgroundColor: NAVY, color: '#fff' }
@@ -577,7 +577,7 @@ export default function VisitorsListPage() {
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
               aria-label="Next page"
             >
               <ChevronRight size={14} />

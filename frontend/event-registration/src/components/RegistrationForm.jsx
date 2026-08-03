@@ -152,7 +152,7 @@ export default function RegistrationForm({ onSuccess }) {
           <button
             type="submit"
             disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-navy via-sky-500 to-brand-lime py-3 text-sm font-semibold text-white transition-all duration-300 hover:opacity-90 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-navy via-sky-500 to-brand-lime py-3 text-sm font-semibold text-white transition-all duration-300 hover:opacity-90 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
           >
             {submitting ? (
               <>

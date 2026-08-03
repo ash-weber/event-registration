@@ -142,7 +142,7 @@ export default function CheckInPage() {
             <button
               type="button"
               onClick={startCamera}
-              className={`flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-semibold transition sm:gap-2 sm:text-sm ${
+              className={`flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-semibold transition cursor-pointer sm:gap-2 sm:text-sm ${
                 activeTab === 'scan'
                   ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200'
                   : 'text-slate-500 hover:text-slate-700'
@@ -153,7 +153,7 @@ export default function CheckInPage() {
             <button
               type="button"
               onClick={focusManualEntry}
-              className={`flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-semibold transition sm:gap-2 sm:text-sm ${
+              className={`flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-semibold transition cursor-pointer sm:gap-2 sm:text-sm ${
                 activeTab === 'paste'
                   ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200'
                   : 'text-slate-500 hover:text-slate-700'
@@ -216,7 +216,7 @@ export default function CheckInPage() {
             <button
               type="submit"
               disabled={submitting || !qrPayload.trim()}
-              className="mb-2 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mb-2 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             >
               {submitting ? (
                 <>
@@ -233,7 +233,7 @@ export default function CheckInPage() {
               type="button"
               onClick={cameraOpen ? stopCamera : startCamera}
               disabled={submitting}
-              className="flex items-center justify-center gap-2 rounded-lg border border-blue-300 bg-white py-3 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex items-center justify-center gap-2 rounded-lg border border-blue-300 bg-white py-3 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
             >
               <Camera size={16} /> {cameraOpen ? 'Stop Camera' : 'Scan with Camera'}
             </button>

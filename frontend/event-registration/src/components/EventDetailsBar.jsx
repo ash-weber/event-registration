@@ -1,7 +1,7 @@
 import { CalendarDays, Clock, MapPin } from 'lucide-react';
 
 export default function EventDetailsBar({
-  dateRange = { label: 'AUGUST', value: '7,8 &9 2026' },
+  dateRange = { label: 'AUGUST', value: '7,8 & 9 2026' },
   venue = { label: 'CODISSIA,', value: 'COIMBATORE.' },
 }) {
   const items = [

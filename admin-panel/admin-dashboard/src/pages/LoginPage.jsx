@@ -263,7 +263,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword((s) => !s)}
-                      className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600"
+                      className="absolute inset-y-0 right-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -271,12 +271,12 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                <label className="flex select-none items-center gap-2 text-sm text-slate-600">
+                <label className="flex select-none items-center gap-2 text-sm text-slate-600 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={remember}
                     onChange={(e) => setRemember(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 focus:ring-2"
+                    className="h-4 w-4 rounded border-slate-300 focus:ring-2 cursor-pointer"
                     style={{ accentColor: NAVY }}
                   />
                   Remember me
@@ -287,7 +287,7 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={submitting || cooldown > 0}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg py-3.5 text-sm font-semibold text-white shadow-md transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:py-3"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg py-3.5 text-sm font-semibold text-white shadow-md transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer sm:py-3"
                   style={{
                     backgroundImage: `linear-gradient(90deg, ${NAVY}, #14294f)`,
                     boxShadow: `0 10px 20px -8px ${NAVY}66`,

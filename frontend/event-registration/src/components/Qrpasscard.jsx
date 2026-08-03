@@ -199,7 +199,7 @@ export default function QRPassCard({ data, onBack, onReset }) {
             <button
               onClick={handleDownload}
               disabled={downloading}
-              className="flex flex-shrink-0 items-center justify-center gap-2 rounded-full border-2 border-white/80 bg-transparent px-4 py-2 text-xs font-bold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-70 sm:text-sm"
+              className="flex flex-shrink-0 items-center justify-center gap-2 rounded-full border-2 border-white/80 bg-transparent px-4 py-2 text-xs font-bold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer sm:text-sm"
             >
               {downloading ? (
                 <>
@@ -215,7 +215,7 @@ export default function QRPassCard({ data, onBack, onReset }) {
             {onBack && (
               <button
                 onClick={onBack}
-                className="flex flex-shrink-0 items-center justify-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold text-rose-800 shadow-sm transition hover:bg-rose-50 sm:text-sm"
+                className="flex flex-shrink-0 items-center justify-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold text-rose-800 shadow-sm transition hover:bg-rose-50 cursor-pointer sm:text-sm"
               >
                 <ArrowLeft size={14} /> Back
               </button>
@@ -224,7 +224,7 @@ export default function QRPassCard({ data, onBack, onReset }) {
             {onReset && (
               <button
                 onClick={onReset}
-                className="flex flex-shrink-0 items-center justify-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold text-emerald-600 shadow-sm transition hover:bg-emerald-50 sm:text-sm"
+                className="flex flex-shrink-0 items-center justify-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold text-emerald-600 shadow-sm transition hover:bg-emerald-50 cursor-pointer sm:text-sm"
               >
                 <RotateCcw size={14} /> Register Another
               </button>
