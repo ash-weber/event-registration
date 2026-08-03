@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import QRPassCard from '../components/QrPassCard';
+import QRPassCard from '../components/Qrpasscard';
 import api from '../api/axios';
 
 export default function QrPassPage() {
