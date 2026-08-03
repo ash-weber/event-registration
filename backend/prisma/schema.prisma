@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Visitor {
+  id   Int         @id @default(autoincrement())
+  registrationId String      @unique @db.VarChar(30)
+  fullName String      @db.VarChar(120)
+  email  String      @db.VarChar(160)
+  mobileNumber   String      @db.VarChar(20)
+  company       String?     @db.VarChar(160)
+  designation   String?     @db.VarChar(120)
+  city    String?     @db.VarChar(100)
+  qrCodeData    String      @db.Text
+  qrCodeImage  String?     @db.LongText
+  emailStatus  EmailStatus @default(PENDING)
+  emailSentAt  DateTime?
+  checkedIn  Boolean     @default(false)
+  checkedInAt  DateTime?
+  ipAddress  String?     @db.VarChar(64)
+  createdAt   DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([email])
+  @@index([mobileNumber])
+  @@index([fullName])
+  @@index([createdAt])
+  @@map("visitors")
+}
+
+model Admin {
+  id   Int       @id @default(autoincrement())
+  name  String    @db.VarChar(120)
+  email String    @unique @db.VarChar(160)
+  password    String    @db.VarChar(255)
+  role AdminRole @default(ADMIN)
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("admins")
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+}
