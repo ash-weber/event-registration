@@ -165,7 +165,7 @@ export default function RegistrationForm({ onSuccess }) {
             />
           </span>
           <div className="min-w-0 text-center">
-            <h2 className="text-lg sm:text-2xl font-bold leading-tight text-brand-navy break-words">
+            <h2 className="text-lg sm:text-2xl font-extrabold leading-tight text-brand-navy break-words">
               INTERIO & EXTERIO EXPO 2026
             </h2>
             <p className="text-[11px] sm:text-sm text-slate-500 mt-0.5">
@@ -186,7 +186,7 @@ export default function RegistrationForm({ onSuccess }) {
               Full Name <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-blue-600">
                 <UserRound size={16} />
               </span>
               <input
@@ -215,7 +215,7 @@ export default function RegistrationForm({ onSuccess }) {
               Email Address <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-blue-600">
                 <Mail size={16} />
               </span>
               <input
@@ -244,7 +244,7 @@ export default function RegistrationForm({ onSuccess }) {
               Mobile Number <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-blue-600">
                 <Phone size={16} />
               </span>
               <input
@@ -277,7 +277,7 @@ export default function RegistrationForm({ onSuccess }) {
                 {label}
               </label>
               <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-blue-600">
                   <Icon size={16} />
                 </span>
                 <input
@@ -321,7 +321,7 @@ export default function RegistrationForm({ onSuccess }) {
               No. of People Attending <span className="text-slate-400">(optional)</span>
             </label>
             <div className="relative">
-              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-blue-600">
                 <Users size={16} />
               </span>
               <input
