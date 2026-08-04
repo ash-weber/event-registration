@@ -27,7 +27,7 @@ const registrationRules = [
   body('mobileNumber')
     .trim()
     .notEmpty().withMessage('Mobile number is required')
-    .matches(/^[0-9+\-\s]{7,20}$/).withMessage('Enter a valid mobile number'),
+    .matches(/^[6-9]\d{9}$/).withMessage('Enter a valid 10-digit mobile number'),
 
   body('company')
     .optional({ checkFalsy: true })
@@ -43,6 +43,11 @@ const registrationRules = [
     .optional({ checkFalsy: true })
     .trim()
     .isLength({ max: 100 }).withMessage('City is too long'),
+
+  body('numberOfAttendees')
+    .optional({ checkFalsy: true })
+    .isInt({ min: 1, max: 50 }).withMessage('Number of attendees must be between 1 and 50')
+    .toInt(),
 
   handleValidation,
 ];

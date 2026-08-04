@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   Users,
-  CalendarDays,
+  CheckCircle2,
   QrCode,
   Clock,
   ArrowRight,
@@ -21,10 +21,33 @@ import { Link, useOutletContext } from 'react-router-dom';
 import api from '../api/axios';
 import { EmailStatusBadge, CheckInBadge } from '../components/StatusBadge';
 
+const ALL_VISITORS_PAGE_SIZE = 100;
+
+async function fetchAllVisitors() {
+  let page = 1;
+  let all = [];
+  let total = Infinity;
+
+  while (all.length < total) {
+    const res = await api.get('/admin/visitors', {
+      params: { page, limit: ALL_VISITORS_PAGE_SIZE },
+    });
+    const batch = res.data.data || [];
+    all = all.concat(batch);
+    total = res.data.pagination?.total ?? all.length;
+    if (batch.length === 0) break;
+    page += 1;
+  }
+
+  return all;
+}
+
 export default function DashboardPage() {
  
   const { rangeDays } = useOutletContext();
   const [stats, setStats] = useState(null);
+ 
+  const [checkedInCount, setCheckedInCount] = useState(null);
   const [chartData, setChartData] = useState([]);
   const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,12 +62,14 @@ export default function DashboardPage() {
       api.get('/admin/dashboard/stats'),
       api.get('/admin/dashboard/registrations-over-time', { params: { days: rangeDays } }),
       api.get('/admin/dashboard/recent', { params: { limit: 5 } }),
+      fetchAllVisitors(),
     ])
-      .then(([statsRes, chartRes, recentRes]) => {
+      .then(([statsRes, chartRes, recentRes, allVisitors]) => {
         if (!active) return;
         setStats(statsRes.data.data);
         setChartData(chartRes.data.data);
         setRecent(recentRes.data.data);
+        setCheckedInCount(allVisitors.filter((v) => v.checkedIn).length);
       })
       .catch((err) => {
         if (active) setError(err.response?.data?.message || 'Failed to load dashboard.');
@@ -67,7 +92,7 @@ export default function DashboardPage() {
   })();
   const todayCount = chartData.find((d) => d.date === todayKey)?.count ?? 0;
 
-  const statCards = stats
+  const statCards = stats && checkedInCount !== null
     ? [
         {
           label: 'Total Visitors',
@@ -78,10 +103,10 @@ export default function DashboardPage() {
           iconColor: 'text-blue-500',
         },
         {
-          label: 'This Event',
-          value: stats.thisEvent.value,
-          change: stats.thisEvent.change,
-          icon: CalendarDays,
+          label: 'Checked In',
+          value: checkedInCount,
+          change: null,
+          icon: CheckCircle2,
           iconBg: 'bg-emerald-50',
           iconColor: 'text-emerald-500',
         },
@@ -136,14 +161,16 @@ export default function DashboardPage() {
                     <p className="text-xl font-bold text-brand-navyDark sm:text-2xl">{card.value}</p>
                   </div>
                 </div>
-                <p
-                  className={`mt-3 text-xs font-medium ${
-                    card.change >= 0 ? 'text-emerald-600' : 'text-red-500'
-                  }`}
-                >
-                  {card.change >= 0 ? '+' : ''}
-                  {card.change}% <span className="font-normal text-slate-400">from last {rangeDays} days</span>
-                </p>
+                {card.change !== null && (
+                  <p
+                    className={`mt-3 text-xs font-medium ${
+                      card.change >= 0 ? 'text-emerald-600' : 'text-red-500'
+                    }`}
+                  >
+                    {card.change >= 0 ? '+' : ''}
+                    {card.change}% <span className="font-normal text-slate-400">from last {rangeDays} days</span>
+                  </p>
+                )}
               </div>
             ))}
       </div>

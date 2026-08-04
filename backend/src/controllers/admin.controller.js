@@ -80,6 +80,7 @@ const listVisitors = asyncHandler(async (req, res) => {
         company: true,
         designation: true,
         city: true,
+        numberOfAttendees: true,
         emailStatus: true,
         checkedIn: true,
         createdAt: true,
@@ -105,7 +106,6 @@ const getVisitorDetail = asyncHandler(async (req, res) => {
   res.json({ success: true, data: visitor });
 });
 
-// GET /api/admin/visitors/export?format=csv|excel&search=
 const exportVisitors = asyncHandler(async (req, res) => {
   const format = (req.query.format || 'csv').toLowerCase();
   const search = req.query.search || '';
@@ -132,6 +132,7 @@ const exportVisitors = asyncHandler(async (req, res) => {
       company: true,
       designation: true,
       city: true,
+      numberOfAttendees: true,
       emailStatus: true,
       checkedIn: true,
       checkedInAt: true,
@@ -149,6 +150,7 @@ const exportVisitors = asyncHandler(async (req, res) => {
     company: v.company || '',
     designation: v.designation || '',
     city: v.city || '',
+    numberOfAttendees: v.numberOfAttendees ?? 1,
     emailStatus: v.emailStatus,
     checkedIn: v.checkedIn ? 'Yes' : 'No',
     checkedInAt: v.checkedInAt ? new Date(v.checkedInAt).toLocaleString('en-IN') : '',
@@ -167,6 +169,7 @@ const exportVisitors = asyncHandler(async (req, res) => {
       { header: 'Company', key: 'company', width: 22 },
       { header: 'Designation', key: 'designation', width: 20 },
       { header: 'City', key: 'city', width: 16 },
+      { header: 'No. of Attendees', key: 'numberOfAttendees', width: 14 },
       { header: 'Email Status', key: 'emailStatus', width: 14 },
       { header: 'Checked In', key: 'checkedIn', width: 12 },
       { header: 'Checked In At', key: 'checkedInAt', width: 20 },
@@ -201,6 +204,7 @@ const exportVisitors = asyncHandler(async (req, res) => {
     { label: 'Company', value: 'company' },
     { label: 'Designation', value: 'designation' },
     { label: 'City', value: 'city' },
+    { label: 'No. of Attendees', value: 'numberOfAttendees' },
     { label: 'Email Status', value: 'emailStatus' },
     { label: 'Checked In', value: 'checkedIn' },
     { label: 'Checked In At', value: 'checkedInAt' },
@@ -213,7 +217,6 @@ const exportVisitors = asyncHandler(async (req, res) => {
   res.setHeader('Content-Disposition', `attachment; filename="visitors-${timestamp}.csv"`);
   res.status(200).send('\uFEFF' + csv);
 });
-
 
 const HEADER_MAP = {
   fullname: 'fullName',
@@ -232,6 +235,9 @@ const HEADER_MAP = {
   designation: 'designation',
   title: 'designation',
   city: 'city',
+  numberofattendees: 'numberOfAttendees',
+  'number of attendees': 'numberOfAttendees',
+  attendees: 'numberOfAttendees',
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -283,6 +289,7 @@ const downloadImportTemplate = asyncHandler(async (req, res) => {
     { header: 'company', key: 'company', width: 22 },
     { header: 'designation', key: 'designation', width: 20 },
     { header: 'city', key: 'city', width: 16 },
+    { header: 'numberOfAttendees', key: 'numberOfAttendees', width: 16 },
   ];
 
   sheet.addRow({
@@ -292,6 +299,7 @@ const downloadImportTemplate = asyncHandler(async (req, res) => {
     company: 'Acme Pvt Ltd',
     designation: 'Manager',
     city: 'Chennai',
+    numberOfAttendees: 1,
   });
 
   const headerRow = sheet.getRow(1);
@@ -326,11 +334,12 @@ const importVisitors = asyncHandler(async (req, res) => {
   const failed = [];
 
   for (let i = 0; i < rows.length; i++) {
-    const rowNum = i + 2; 
+    const rowNum = i + 2;
     const r = rows[i];
     const fullName = r.fullName || '';
     const email = (r.email || '').toLowerCase();
     const mobileNumber = r.mobileNumber || '';
+    const numberOfAttendees = r.numberOfAttendees ? parseInt(r.numberOfAttendees, 10) : 1;
 
     if (!fullName || !email || !mobileNumber) {
       skipped.push({ row: rowNum, reason: 'Missing fullName, email or mobileNumber.' });
@@ -358,6 +367,7 @@ const importVisitors = asyncHandler(async (req, res) => {
           company: r.company || null,
           designation: r.designation || null,
           city: r.city || null,
+          numberOfAttendees: Number.isNaN(numberOfAttendees) ? 1 : numberOfAttendees,
           qrCodeData: payload,
           qrCodeImage: dataUrl,
           emailStatus: 'PENDING',

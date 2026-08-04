@@ -12,7 +12,9 @@ function saveSession(token, adminData, remember) {
   const other = remember ? sessionStorage : localStorage;
 
   store.setItem(TOKEN_KEY, token);
-  store.setItem(PROFILE_KEY, JSON.stringify(adminData));
+  if (adminData) {
+    store.setItem(PROFILE_KEY, JSON.stringify(adminData));
+  }
 
   other.removeItem(TOKEN_KEY);
   other.removeItem(PROFILE_KEY);
@@ -24,7 +26,15 @@ function getStoredToken() {
 
 function getStoredProfile() {
   const raw = localStorage.getItem(PROFILE_KEY) || sessionStorage.getItem(PROFILE_KEY);
-  return raw ? JSON.parse(raw) : null;
+  if (!raw || raw === 'undefined') return null;
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error('Failed to parse stored profile, clearing it:', err);
+    localStorage.removeItem(PROFILE_KEY);
+    sessionStorage.removeItem(PROFILE_KEY);
+    return null;
+  }
 }
 
 function clearSession() {
@@ -52,9 +62,12 @@ export function AuthProvider({ children }) {
     api
       .get('/admin/me')
       .then((res) => {
-        setAdmin(res.data.data);
-        const store = localStorage.getItem(TOKEN_KEY) ? localStorage : sessionStorage;
-        store.setItem(PROFILE_KEY, JSON.stringify(res.data.data));
+        const adminData = res.data.data;
+        setAdmin(adminData);
+        if (adminData) {
+          const store = localStorage.getItem(TOKEN_KEY) ? localStorage : sessionStorage;
+          store.setItem(PROFILE_KEY, JSON.stringify(adminData));
+        }
       })
       .catch((err) => {
         const status = err.response?.status;
@@ -69,6 +82,7 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password, remember = false) => {
     const res = await api.post('/admin/login', { email, password });
+    console.log('login response:', res.data); // TEMP: verify the actual shape, remove once confirmed
     const { token, admin: adminData } = res.data.data;
     saveSession(token, adminData, remember);
     setAdmin(adminData);

@@ -6,7 +6,7 @@ const { generateQrCodeImage } = require('../utils/qrGenerator');
 const { sendRegistrationEmail } = require('../utils/emailService');
 
 const registerVisitor = asyncHandler(async (req, res) => {
-  const { fullName, email, mobileNumber, company, designation, city } = req.body;
+  const { fullName, email, mobileNumber, company, designation, city, numberOfAttendees } = req.body;
 
   const existing = await prisma.visitor.findFirst({ where: { email } });
   if (existing) {
@@ -27,13 +27,13 @@ const registerVisitor = asyncHandler(async (req, res) => {
       company: company || null,
       designation: designation || null,
       city: city || null,
+      numberOfAttendees: numberOfAttendees || 1,
       qrCodeData: payload,
       qrCodeImage: dataUrl,
       ipAddress: req.ip,
     },
   });
 
-  // Fire the email but don't block the response on SMTP latency/failures
   const emailResult = await sendRegistrationEmail({
     to: email,
     fullName,
@@ -59,6 +59,7 @@ const registerVisitor = asyncHandler(async (req, res) => {
       company: visitor.company,
       designation: visitor.designation,
       city: visitor.city,
+      numberOfAttendees: visitor.numberOfAttendees,
       qrCodeImage: dataUrl,
       emailSent: emailResult.success,
     },
@@ -77,6 +78,7 @@ const getRegistrationById = asyncHandler(async (req, res) => {
       company: true,
       designation: true,
       city: true,
+      numberOfAttendees: true,
       qrCodeImage: true,
       emailStatus: true,
       checkedIn: true,

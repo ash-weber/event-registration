@@ -23,6 +23,27 @@ import VisitorDetailModal from '../components/VisitorDetailModal';
 
 const LIMIT = 20;
 
+const ALL_VISITORS_PAGE_SIZE = 100;
+
+async function fetchAllVisitors(api) {
+  let page = 1;
+  let all = [];
+  let total = Infinity;
+
+  while (all.length < total) {
+    const res = await api.get('/admin/visitors', {
+      params: { page, limit: ALL_VISITORS_PAGE_SIZE },
+    });
+    const batch = res.data.data || [];
+    all = all.concat(batch);
+    total = res.data.pagination?.total ?? all.length;
+    if (batch.length === 0) break;
+    page += 1;
+  }
+
+  return { all, total };
+}
+
 const NAVY = '#1a3a6e';
 const GREEN = '#8bc53f';
 
@@ -44,6 +65,7 @@ export default function VisitorsListPage() {
   const [activeVisitorId, setActiveVisitorId] = useState(null);
   const [downloadingId, setDownloadingId] = useState(null);
 
+  
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -72,14 +94,28 @@ export default function VisitorsListPage() {
     }
   }, []);
 
-  useEffect(() => {
+  const fetchStats = useCallback(async () => {
     setStatsLoading(true);
-    api
-      .get('/admin/dashboard/stats')
-      .then((res) => setStats(res.data.data))
-      .catch(() => {})
-      .finally(() => setStatsLoading(false));
+    try {
+     
+      const { all, total: totalVisitors } = await fetchAllVisitors(api);
+      const checkedInCount = all.filter((v) => v.checkedIn).length;
+      const pendingCount = all.filter((v) => v.emailStatus === 'PENDING').length;
+
+      setStats({
+        totalVisitors: { value: totalVisitors },
+        thisEvent: { value: checkedInCount },
+        pending: { value: pendingCount },
+      });
+    } catch {
+    } finally {
+      setStatsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   useEffect(() => {
     const handle = setTimeout(() => {
@@ -210,7 +246,6 @@ export default function VisitorsListPage() {
   }
 
   return (
-   
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="flex-shrink-0">
         <h1 className="text-lg font-bold sm:text-xl" style={{ color: NAVY }}>
@@ -395,7 +430,6 @@ export default function VisitorsListPage() {
         </div>
       )}
 
-     
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-b-xl border border-slate-100 bg-white shadow-sm">
         <div className="min-h-0 flex-1 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {loading && (
@@ -469,7 +503,7 @@ export default function VisitorsListPage() {
           )}
 
           {!loading && !error && visibleVisitors.length > 0 && (
-            <div className="hidden overflow-x-auto sm:block">
+            <div className="hidden overflow-x-auto sm:block [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <table className="w-full text-left text-sm">
                 <thead className="sticky top-0 z-10">
                   <tr className="border-b border-slate-100 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
@@ -536,7 +570,6 @@ export default function VisitorsListPage() {
           )}
         </div>
 
-        {/* Pagination — stays pinned at the bottom of the card, never scrolls */}
         <div className="flex flex-shrink-0 flex-col gap-2 border-t border-slate-100 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[11px] text-slate-500">
             Showing {visitors.length === 0 ? 0 : (page - 1) * LIMIT + 1} to{' '}

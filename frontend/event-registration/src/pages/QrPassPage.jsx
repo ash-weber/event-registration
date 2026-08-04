@@ -45,7 +45,7 @@ export default function QrPassPage() {
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 text-slate-500">
         <p>{error || 'Registration not found.'}</p>
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/', { replace: true })}
           className="text-sm font-semibold text-blue-900 hover:underline"
         >
           Back to registration
@@ -57,8 +57,8 @@ export default function QrPassPage() {
   return (
     <QRPassCard
       data={data}
-      onBack={() => navigate(`/success/${registrationId}`, { state: { data } })}
-      onReset={() => navigate('/')}
+      onBack={() => navigate('/', { replace: true })}
+      onReset={() => navigate('/', { replace: true })}
     />
   );
 }

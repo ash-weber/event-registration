@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { UserRound, Mail, Phone, Building2, IdCard, MapPinned, Loader2, Leaf, ShieldCheck } from 'lucide-react';
+import { UserRound, Mail, Phone, Building2, IdCard, Users, Loader2, Leaf, ShieldCheck, MapPinned } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
 
@@ -10,28 +10,46 @@ const initialForm = {
   company: '',
   designation: '',
   city: '',
+  numberOfAttendees: '',
 };
 
-const fields = [
+const textFields = [
   { name: 'fullName', label: 'Full Name', icon: UserRound, placeholder: 'Enter your full name', required: true },
   { name: 'email', label: 'Email Address', icon: Mail, placeholder: 'Enter your email address', required: true, type: 'email' },
-  { name: 'mobileNumber', label: 'Mobile Number', icon: Phone, placeholder: 'Enter your mobile number', required: true, type: 'tel' },
   { name: 'company', label: 'Company / Organization', icon: Building2, placeholder: 'Enter your company or organization' },
   { name: 'designation', label: 'Designation', icon: IdCard, placeholder: 'Enter your designation' },
-  { name: 'city', label: 'City', icon: MapPinned, placeholder: 'Enter your city' },
 ];
+
+const MOBILE_REGEX = /^[6-9]\d{9}$/;
 
 function validate(form) {
   const errors = {};
+
   if (!form.fullName.trim()) errors.fullName = 'Full name is required';
   else if (form.fullName.trim().length < 2) errors.fullName = 'Full name must be at least 2 characters';
+  else if (form.fullName.trim().length > 120) errors.fullName = 'Full name is too long';
   else if (!/^[a-zA-Z\s.'-]+$/.test(form.fullName.trim())) errors.fullName = 'Full name contains invalid characters';
 
   if (!form.email.trim()) errors.email = 'Email is required';
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) errors.email = 'Enter a valid email address';
+  else if (form.email.trim().length > 160) errors.email = 'Email is too long';
 
   if (!form.mobileNumber.trim()) errors.mobileNumber = 'Mobile number is required';
-  else if (!/^[0-9+\-\s]{7,20}$/.test(form.mobileNumber.trim())) errors.mobileNumber = 'Enter a valid mobile number';
+  else if (!MOBILE_REGEX.test(form.mobileNumber.trim())) {
+    errors.mobileNumber = 'Enter a valid 10-digit mobile number';
+  }
+
+  if (form.company && form.company.trim().length > 160) errors.company = 'Company name is too long';
+  if (form.designation && form.designation.trim().length > 120) errors.designation = 'Designation is too long';
+  if (form.city && form.city.trim().length > 100) errors.city = 'City name is too long';
+
+  if (form.numberOfAttendees) {
+    if (!/^\d+$/.test(form.numberOfAttendees) || Number(form.numberOfAttendees) < 1) {
+      errors.numberOfAttendees = 'Enter a valid number of attendees';
+    } else if (Number(form.numberOfAttendees) > 50) {
+      errors.numberOfAttendees = 'Maximum 50 attendees allowed';
+    }
+  }
 
   return errors;
 }
@@ -48,6 +66,18 @@ export default function RegistrationForm({ onSuccess }) {
     if (errors[name]) setErrors((er) => ({ ...er, [name]: undefined }));
   }
 
+  function handleMobileChange(e) {
+    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setForm((f) => ({ ...f, mobileNumber: digitsOnly }));
+    if (errors.mobileNumber) setErrors((er) => ({ ...er, mobileNumber: undefined }));
+  }
+
+  function handleAttendeesChange(e) {
+    const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 2);
+    setForm((f) => ({ ...f, numberOfAttendees: digitsOnly }));
+    if (errors.numberOfAttendees) setErrors((er) => ({ ...er, numberOfAttendees: undefined }));
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     const clientErrors = validate(form);
@@ -58,7 +88,11 @@ export default function RegistrationForm({ onSuccess }) {
 
     setSubmitting(true);
     try {
-      const res = await api.post('/registrations', form);
+      const payload = {
+        ...form,
+        numberOfAttendees: form.numberOfAttendees ? Number(form.numberOfAttendees) : undefined,
+      };
+      const res = await api.post('/registrations', payload);
       toast.success('Registration successful!');
       onSuccess(res.data.data);
     } catch (err) {
@@ -107,7 +141,7 @@ export default function RegistrationForm({ onSuccess }) {
           </span>
           <div>
             <h2 className="text-xl font-bold leading-tight text-brand-navy">Event Registration</h2>
-            <p className="text-xs text-slate-500">Fill  your details to register</p>
+            <p className="text-xs text-slate-500">Fill your details to register</p>
           </div>
         </div>
 
@@ -118,10 +152,100 @@ export default function RegistrationForm({ onSuccess }) {
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-3">
-          {fields.map(({ name, label, icon: Icon, placeholder, required, type }) => (
+          <div>
+            <label htmlFor="fullName" className="mb-1 block text-xs font-medium text-slate-700">
+              Full Name <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                <UserRound size={16} />
+              </span>
+              <input
+                id="fullName"
+                name="fullName"
+                type="text"
+                value={form.fullName}
+                onChange={handleChange}
+                placeholder="Enter your full name"
+                aria-invalid={Boolean(errors.fullName)}
+                aria-describedby={errors.fullName ? 'fullName-error' : undefined}
+                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
+                  errors.fullName ? 'border-red-400' : 'border-slate-200 focus:border-brand-teal'
+                }`}
+              />
+            </div>
+            {errors.fullName && (
+              <p id="fullName-error" className="mt-1 text-xs text-red-500">
+                {errors.fullName}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="email" className="mb-1 block text-xs font-medium text-slate-700">
+              Email Address <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                <Mail size={16} />
+              </span>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Enter your email address"
+                aria-invalid={Boolean(errors.email)}
+                aria-describedby={errors.email ? 'email-error' : undefined}
+                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
+                  errors.email ? 'border-red-400' : 'border-slate-200 focus:border-brand-teal'
+                }`}
+              />
+            </div>
+            {errors.email && (
+              <p id="email-error" className="mt-1 text-xs text-red-500">
+                {errors.email}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="mobileNumber" className="mb-1 block text-xs font-medium text-slate-700">
+              Mobile Number <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                <Phone size={16} />
+              </span>
+              <input
+                id="mobileNumber"
+                name="mobileNumber"
+                type="tel"
+                inputMode="numeric"
+                autoComplete="tel"
+                maxLength={10}
+                value={form.mobileNumber}
+                onChange={handleMobileChange}
+                placeholder="10-digit mobile number"
+                aria-invalid={Boolean(errors.mobileNumber)}
+                aria-describedby={errors.mobileNumber ? 'mobileNumber-error' : undefined}
+                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
+                  errors.mobileNumber ? 'border-red-400' : 'border-slate-200 focus:border-brand-teal'
+                }`}
+              />
+            </div>
+            {errors.mobileNumber && (
+              <p id="mobileNumber-error" className="mt-1 text-xs text-red-500">
+                {errors.mobileNumber}
+              </p>
+            )}
+          </div>
+
+          {textFields.slice(2).map(({ name, label, icon: Icon, placeholder }) => (
             <div key={name}>
               <label htmlFor={name} className="mb-1 block text-xs font-medium text-slate-700">
-                {label} {required && <span className="text-red-500">*</span>}
+                {label}
               </label>
               <div className="relative">
                 <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
@@ -130,24 +254,83 @@ export default function RegistrationForm({ onSuccess }) {
                 <input
                   id={name}
                   name={name}
-                  type={type || 'text'}
+                  type="text"
                   value={form[name]}
                   onChange={handleChange}
                   placeholder={placeholder}
                   aria-invalid={Boolean(errors[name])}
-                  aria-describedby={errors[name] ? `${name}-error` : undefined}
                   className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
                     errors[name] ? 'border-red-400' : 'border-slate-200 focus:border-brand-teal'
                   }`}
                 />
               </div>
               {errors[name] && (
-                <p id={`${name}-error`} className="mt-1 text-xs text-red-500">
-                  {errors[name]}
-                </p>
+                <p className="mt-1 text-xs text-red-500">{errors[name]}</p>
               )}
             </div>
           ))}
+
+          <div>
+            <label htmlFor="city" className="mb-1 block text-xs font-medium text-slate-700">
+              City
+            </label>
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                <MapPinned size={16} />
+              </span>
+              <input
+                id="city"
+                name="city"
+                type="text"
+                value={form.city}
+                onChange={handleChange}
+                placeholder="Enter your city"
+                aria-invalid={Boolean(errors.city)}
+                aria-describedby={errors.city ? 'city-error' : undefined}
+                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
+                  errors.city ? 'border-red-400' : 'border-slate-200 focus:border-brand-teal'
+                }`}
+              />
+            </div>
+            {errors.city && (
+              <p id="city-error" className="mt-1 text-xs text-red-500">
+                {errors.city}
+              </p>
+            )}
+          </div>
+
+          {/* No. of people attending - optional */}
+          <div>
+            <label htmlFor="numberOfAttendees" className="mb-1 block text-xs font-medium text-slate-700">
+              No. of People Attending <span className="text-slate-400">(optional)</span>
+            </label>
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                <Users size={16} />
+              </span>
+              <input
+                id="numberOfAttendees"
+                name="numberOfAttendees"
+                type="number"
+                inputMode="numeric"
+                min="1"
+                max="50"
+                value={form.numberOfAttendees}
+                onChange={handleAttendeesChange}
+                placeholder="e.g. 2"
+                aria-invalid={Boolean(errors.numberOfAttendees)}
+                aria-describedby={errors.numberOfAttendees ? 'numberOfAttendees-error' : undefined}
+                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
+                  errors.numberOfAttendees ? 'border-red-400' : 'border-slate-200 focus:border-brand-teal'
+                }`}
+              />
+            </div>
+            {errors.numberOfAttendees && (
+              <p id="numberOfAttendees-error" className="mt-1 text-xs text-red-500">
+                {errors.numberOfAttendees}
+              </p>
+            )}
+          </div>
 
           <button
             type="submit"

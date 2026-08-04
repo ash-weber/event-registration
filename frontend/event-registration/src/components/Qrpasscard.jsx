@@ -2,7 +2,6 @@ import { useRef, useState } from 'react';
 import {
   QrCode,
   Download,
-  ArrowLeft,
   RotateCcw,
   Calendar,
   MapPin,
@@ -18,7 +17,7 @@ function BuoyantLogo() {
     <img
       src={buoyantLogo}
       alt="Buoyant Media"
-      className="h-10 w-auto object-contain sm:h-12"
+      className="h-8 w-auto object-contain sm:h-12"
     />
   );
 }
@@ -45,13 +44,13 @@ const TOP_INFO = [
   { icon: MapPin, key: 'venue' },
 ];
 
-export default function QRPassCard({ data, onBack, onReset }) {
+export default function QRPassCard({ data, onReset }) {
   const cardRef = useRef(null);
   const [downloading, setDownloading] = useState(false);
 
   const {
     fullName = 'Shamima',
-    designation = 'MD',
+    designation,
     company = 'BUOYANT',
     registrationId = 'ATS26-000006',
     eventDates = '07, 08 & 09\nAUGUST 2026',
@@ -59,13 +58,12 @@ export default function QRPassCard({ data, onBack, onReset }) {
     qrCodeImage,
   } = data || {};
 
-  
   async function handleDownload() {
     if (!cardRef.current || downloading) return;
     setDownloading(true);
     try {
       const canvas = await html2canvas(cardRef.current, {
-        scale: 3, 
+        scale: 3,
         useCORS: true,
         backgroundColor: '#ffffff',
       });
@@ -86,8 +84,13 @@ export default function QRPassCard({ data, onBack, onReset }) {
   const values = { fullName, designation, company, registrationId };
   const topValues = { eventDates, venue };
 
+  const infoRows = INFO_ROWS.filter(({ key }) => {
+    const v = values[key];
+    return typeof v === 'string' ? v.trim().length > 0 : Boolean(v);
+  });
+
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center bg-slate-100 p-3 sm:p-6 md:p-8">
+    <div className="relative flex min-h-screen w-full items-center justify-center bg-slate-100 p-2 sm:p-6 md:p-8">
       <div className="relative w-full max-w-md">
         <div
           ref={cardRef}
@@ -97,53 +100,52 @@ export default function QRPassCard({ data, onBack, onReset }) {
 
           <div className="h-6 w-full bg-rose-800 sm:h-8" />
 
-          <div className="relative z-10 flex flex-col gap-5 px-4 pb-6 pt-5 sm:gap-6 sm:px-7 sm:pt-6">
+          <div className="relative z-10 flex flex-col gap-3.5 px-3 pb-4 pt-3.5 sm:gap-6 sm:px-7 sm:pt-6">
             <div className="flex items-center justify-between gap-2 sm:gap-3">
               <img
                 src={interioLogo}
                 alt="Interio & Exterio Expo 2026"
-                className="h-20 w-auto flex-shrink-0 object-contain sm:h-24"
+                className="h-14 w-auto flex-shrink-0 object-contain sm:h-24"
               />
-              <span className="h-16 w-px flex-shrink-0 bg-slate-200 sm:h-20" />
+              <span className="h-12 w-px flex-shrink-0 bg-slate-200 sm:h-20" />
               <div className="flex flex-1 flex-col items-center gap-0.5 px-1 text-center">
-                <p className="text-sm font-extrabold leading-tight tracking-tight text-slate-900 sm:text-base">
+                <p className="text-xs font-extrabold leading-tight tracking-tight text-slate-900 sm:text-base">
                   INTERIO <span className="text-amber-600">&amp; EXTERIO</span>
                 </p>
-                <p className="text-sm font-extrabold leading-tight tracking-tight text-slate-900 sm:text-base">
+                <p className="text-xs font-extrabold leading-tight tracking-tight text-slate-900 sm:text-base">
                   EXPO 2026
                 </p>
-                <p className="mt-0.5 text-[10px] font-bold tracking-wide text-rose-800 sm:text-xs">
+                <p className="mt-0.5 text-[9px] font-bold tracking-wide text-rose-800 sm:text-xs">
                   13<sup>TH</sup> EDITION
                 </p>
               </div>
-              <span className="h-16 w-px flex-shrink-0 bg-slate-200 sm:h-20" />
+              <span className="h-12 w-px flex-shrink-0 bg-slate-200 sm:h-20" />
               <div className="flex flex-shrink-0 flex-col items-end gap-0.5">
-                
                 <img
                   src={ciconLogo}
                   alt="CICON 2026 Civil Expo"
-                  className="h-14 w-auto max-w-[150px] object-contain sm:h-16 sm:max-w-[170px]"
+                  className="h-10 w-auto max-w-[110px] object-contain sm:h-16 sm:max-w-[170px]"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 divide-y divide-slate-100 rounded-xl border border-slate-200 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+            <div className="grid grid-cols-2 divide-x divide-slate-100 rounded-lg border border-slate-200">
               {TOP_INFO.map(({ icon: Icon, key }) => (
-                <div key={key} className="flex items-center gap-2.5 px-3 py-2.5">
-                  <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-rose-700 text-white">
-                    <Icon size={14} />
+                <div key={key} className="flex items-center gap-1.5 px-2 py-2">
+                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-rose-700 text-white">
+                    <Icon size={12} />
                   </span>
-                  <span className="whitespace-pre-line text-xs font-bold leading-tight text-slate-900 sm:text-sm">
+                  <span className="whitespace-pre-line text-[10px] font-bold leading-tight text-slate-900 sm:text-sm">
                     {topValues[key]}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className="flex flex-col gap-3 px-1 sm:gap-3.5 sm:px-2">
-              {INFO_ROWS.map(({ label, key }) => (
-                <p key={key} className="flex text-xs sm:text-sm">
-                  <span className="w-[140px] flex-shrink-0 font-bold text-rose-700 sm:w-[160px]">
+            <div className="flex flex-col gap-2 px-1 sm:gap-3.5 sm:px-2">
+              {infoRows.map(({ label, key }) => (
+                <p key={key} className="flex text-[11px] sm:text-sm">
+                  <span className="w-[110px] flex-shrink-0 font-bold text-rose-700 sm:w-[160px]">
                     {label}
                   </span>
                   <span className="mr-2 text-slate-400">:</span>
@@ -155,7 +157,7 @@ export default function QRPassCard({ data, onBack, onReset }) {
             </div>
 
             <div className="flex justify-center">
-              <div className="flex h-36 w-36 items-center justify-center sm:h-40 sm:w-40">
+              <div className="flex h-28 w-28 items-center justify-center sm:h-40 sm:w-40">
                 {qrCodeImage ? (
                   <img
                     src={qrCodeImage}
@@ -163,13 +165,13 @@ export default function QRPassCard({ data, onBack, onReset }) {
                     className="h-full w-full object-contain"
                   />
                 ) : (
-                  <QrCode size={140} className="text-black" />
+                  <QrCode size={110} className="text-black" />
                 )}
               </div>
             </div>
 
-            <div className="flex flex-col items-center gap-2.5 pt-1">
-              <span className="h-px w-48 flex-shrink-0 bg-rose-800/70 sm:w-56" />
+            <div className="flex flex-col items-center gap-2 pt-0.5">
+              <span className="h-px w-36 flex-shrink-0 bg-rose-800/70 sm:w-56" />
               <BuoyantLogo />
             </div>
           </div>
@@ -184,16 +186,15 @@ export default function QRPassCard({ data, onBack, onReset }) {
             <path d="M0 40 L0 24 C70 10 140 8 210 20 C280 32 330 18 400 12 L400 40 Z" fill="#9f1239" />
           </svg>
 
-          <div className="relative z-10 -mt-px flex items-center justify-center gap-3 bg-rose-800 px-4 pb-5 pt-2 sm:pb-6">
+          <div className="relative z-10 -mt-px flex items-center justify-center gap-2.5 bg-rose-800 px-4 pb-3.5 pt-1.5 sm:pb-6">
             <span className="h-px w-10 flex-shrink-0 bg-white/70 sm:w-14" />
-            <span className="text-lg font-extrabold tracking-wide text-white sm:text-xl">
+            <span className="text-base font-extrabold tracking-wide text-white sm:text-xl">
               Visitors Pass
             </span>
             <span className="h-px w-10 flex-shrink-0 bg-white/70 sm:w-14" />
           </div>
         </div>
 
-      
         <div className="rounded-b-[20px] border-2 border-t-0 border-rose-100 bg-rose-800 px-3 pb-4 pt-3 shadow-2xl sm:px-5">
           <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
             <button
@@ -211,15 +212,6 @@ export default function QRPassCard({ data, onBack, onReset }) {
                 </>
               )}
             </button>
-
-            {onBack && (
-              <button
-                onClick={onBack}
-                className="flex flex-shrink-0 items-center justify-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-bold text-rose-800 shadow-sm transition hover:bg-rose-50 cursor-pointer sm:text-sm"
-              >
-                <ArrowLeft size={14} /> Back
-              </button>
-            )}
 
             {onReset && (
               <button
