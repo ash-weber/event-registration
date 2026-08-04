@@ -8,11 +8,27 @@ const { sendRegistrationEmail } = require('../utils/emailService');
 const registerVisitor = asyncHandler(async (req, res) => {
   const { fullName, email, mobileNumber, company, designation, city, numberOfAttendees } = req.body;
 
-  const existing = await prisma.visitor.findFirst({ where: { email } });
+  const existing = await prisma.visitor.findFirst({
+    where: {
+      OR: [{ email }, { mobileNumber }],
+    },
+  });
+
   if (existing) {
-    throw new ApiError(409, 'This email address is already registered for the event.', {
-      registrationId: existing.registrationId,
-    });
+    if (existing.email === email) {
+      throw new ApiError(
+        409,
+        'This email address is already registered for the event.',
+        [{ field: 'email', message: 'This email address is already registered for the event.' }]
+      );
+    }
+    if (existing.mobileNumber === mobileNumber) {
+      throw new ApiError(
+        409,
+        'This mobile number is already registered. Please use a different mobile number.',
+        [{ field: 'mobileNumber', message: 'This mobile number is already registered. Please use a different mobile number.' }]
+      );
+    }
   }
 
   const registrationId = await generateRegistrationId();

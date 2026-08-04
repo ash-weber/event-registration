@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { UserRound, Mail, Phone, Building2, IdCard, Users, Loader2, Leaf, ShieldCheck, MapPinned } from 'lucide-react';
+import { UserRound, Mail, Phone, Building2, IdCard, Users, Loader2, Leaf, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
+import logoImg from '../assets/tab.png';
+import CityAutocomplete from './CityAutocomplete';
 
 const initialForm = {
   fullName: '',
@@ -16,7 +18,7 @@ const initialForm = {
 const textFields = [
   { name: 'fullName', label: 'Full Name', icon: UserRound, placeholder: 'Enter your full name', required: true },
   { name: 'email', label: 'Email Address', icon: Mail, placeholder: 'Enter your email address', required: true, type: 'email' },
-  { name: 'company', label: 'Company / Organization', icon: Building2, placeholder: 'Enter your company or organization' },
+  { name: 'company', label: 'Company / Organization', icon: Building2, placeholder: 'Company or organization' },
   { name: 'designation', label: 'Designation', icon: IdCard, placeholder: 'Enter your designation' },
 ];
 
@@ -78,6 +80,11 @@ export default function RegistrationForm({ onSuccess }) {
     if (errors.numberOfAttendees) setErrors((er) => ({ ...er, numberOfAttendees: undefined }));
   }
 
+  function handleCityChange(val) {
+    setForm((f) => ({ ...f, city: val }));
+    if (errors.city) setErrors((er) => ({ ...er, city: undefined }));
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     const clientErrors = validate(form);
@@ -105,7 +112,21 @@ export default function RegistrationForm({ onSuccess }) {
         setErrors(fieldErrors);
         toast.error('Please check the highlighted fields.');
       } else if (res?.status === 409) {
-        toast.error(res.data?.message || 'This email is already registered.');
+        const message = res.data?.message || 'This mobile number or email is already registered.';
+        const errArray = Array.isArray(res.data?.errors) ? res.data.errors : [];
+        if (errArray.length > 0) {
+          const fieldErrors = {};
+          errArray.forEach((e) => {
+            fieldErrors[e.field] = e.message;
+          });
+          setErrors(fieldErrors);
+        } else {
+          const field = message.toLowerCase().includes('mobile') ? 'mobileNumber' : 'email';
+          setErrors((er) => ({ ...er, [field]: message }));
+        }
+        toast.error(message);
+      } else if (!res) {
+        toast.error('Network error. Please check your connection and try again.');
       } else {
         toast.error(res?.data?.message || 'Something went wrong. Please try again.');
       }
@@ -118,7 +139,7 @@ export default function RegistrationForm({ onSuccess }) {
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="relative w-full max-w-md rounded-2xl p-[2px] bg-[length:300%_300%] bg-gradient-to-r from-brand-navy via-sky-400 via-brand-lime via-sky-400 to-brand-navy shadow-xl transition-all duration-500 ease-out"
+      className="relative w-full max-w-md mx-auto rounded-2xl p-[2px] bg-[length:300%_300%] bg-gradient-to-r from-brand-navy via-sky-400 via-brand-lime via-sky-400 to-brand-navy shadow-xl transition-all duration-500 ease-out"
       style={{
         animation: `border-spin ${hovered ? '1.8s' : '5s'} linear infinite`,
         boxShadow: hovered
@@ -134,14 +155,20 @@ export default function RegistrationForm({ onSuccess }) {
         }
       `}</style>
 
-      <div className="w-full rounded-[calc(1rem-2px)] bg-white p-5 sm:p-6 transition-transform duration-500 ease-out">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-brand-navy text-white transition-transform duration-500 ease-out">
-            <UserRound size={20} />
+      <div className="w-full rounded-[calc(1rem-2px)] bg-white p-4 sm:p-6 transition-transform duration-500 ease-out">
+        <div className="flex flex-col items-center justify-center gap-2 text-center sm:flex-row sm:gap-3">
+          <span className="flex h-9 w-9 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-full text-white overflow-hidden transition-transform duration-500 ease-out">
+            <img
+              src={logoImg}
+              alt="Interio & Exterio Expo Logo"
+              className="h-full w-full object-cover"
+            />
           </span>
-          <div>
-            <h2 className="text-xl font-bold leading-tight text-brand-navy">Event Registration</h2>
-            <p className="text-xs text-slate-500">Fill your details to register</p>
+          <div className="min-w-0 text-center sm:text-left">
+            <h2 className="text-base sm:text-xl font-bold leading-tight text-brand-navy truncate">
+              INTERIO & EXTERIO EXPO
+            </h2>
+            <p className="text-[11px] sm:text-xs text-slate-500">Fill your details to register</p>
           </div>
         </div>
 
@@ -169,7 +196,7 @@ export default function RegistrationForm({ onSuccess }) {
                 placeholder="Enter your full name"
                 aria-invalid={Boolean(errors.fullName)}
                 aria-describedby={errors.fullName ? 'fullName-error' : undefined}
-                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
+                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-base sm:text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
                   errors.fullName ? 'border-red-400' : 'border-slate-200 focus:border-brand-teal'
                 }`}
               />
@@ -198,7 +225,7 @@ export default function RegistrationForm({ onSuccess }) {
                 placeholder="Enter your email address"
                 aria-invalid={Boolean(errors.email)}
                 aria-describedby={errors.email ? 'email-error' : undefined}
-                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
+                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-base sm:text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
                   errors.email ? 'border-red-400' : 'border-slate-200 focus:border-brand-teal'
                 }`}
               />
@@ -230,7 +257,7 @@ export default function RegistrationForm({ onSuccess }) {
                 placeholder="10-digit mobile number"
                 aria-invalid={Boolean(errors.mobileNumber)}
                 aria-describedby={errors.mobileNumber ? 'mobileNumber-error' : undefined}
-                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
+                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-base sm:text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
                   errors.mobileNumber ? 'border-red-400' : 'border-slate-200 focus:border-brand-teal'
                 }`}
               />
@@ -259,7 +286,7 @@ export default function RegistrationForm({ onSuccess }) {
                   onChange={handleChange}
                   placeholder={placeholder}
                   aria-invalid={Boolean(errors[name])}
-                  className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
+                  className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-base sm:text-sm text-slate-800 placeholder:text-slate-400 placeholder:text-[13px] sm:placeholder:text-sm placeholder:truncate transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
                     errors[name] ? 'border-red-400' : 'border-slate-200 focus:border-brand-teal'
                   }`}
                 />
@@ -274,24 +301,12 @@ export default function RegistrationForm({ onSuccess }) {
             <label htmlFor="city" className="mb-1 block text-xs font-medium text-slate-700">
               City
             </label>
-            <div className="relative">
-              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
-                <MapPinned size={16} />
-              </span>
-              <input
-                id="city"
-                name="city"
-                type="text"
-                value={form.city}
-                onChange={handleChange}
-                placeholder="Enter your city"
-                aria-invalid={Boolean(errors.city)}
-                aria-describedby={errors.city ? 'city-error' : undefined}
-                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
-                  errors.city ? 'border-red-400' : 'border-slate-200 focus:border-brand-teal'
-                }`}
-              />
-            </div>
+            <CityAutocomplete
+              id="city"
+              name="city"
+              value={form.city}
+              onChange={handleCityChange}
+            />
             {errors.city && (
               <p id="city-error" className="mt-1 text-xs text-red-500">
                 {errors.city}
@@ -299,7 +314,6 @@ export default function RegistrationForm({ onSuccess }) {
             )}
           </div>
 
-          {/* No. of people attending - optional */}
           <div>
             <label htmlFor="numberOfAttendees" className="mb-1 block text-xs font-medium text-slate-700">
               No. of People Attending <span className="text-slate-400">(optional)</span>
@@ -320,7 +334,7 @@ export default function RegistrationForm({ onSuccess }) {
                 placeholder="e.g. 2"
                 aria-invalid={Boolean(errors.numberOfAttendees)}
                 aria-describedby={errors.numberOfAttendees ? 'numberOfAttendees-error' : undefined}
-                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
+                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-base sm:text-sm text-slate-800 placeholder:text-slate-400 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-brand-teal/40 ${
                   errors.numberOfAttendees ? 'border-red-400' : 'border-slate-200 focus:border-brand-teal'
                 }`}
               />
@@ -335,7 +349,7 @@ export default function RegistrationForm({ onSuccess }) {
           <button
             type="submit"
             disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-navy via-sky-500 to-brand-lime py-3 text-sm font-semibold text-white transition-all duration-300 hover:opacity-90 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-brand-navy via-sky-500 to-brand-lime py-3.5 sm:py-3 text-sm font-semibold text-white transition-all duration-300 hover:opacity-90 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
           >
             {submitting ? (
               <>
@@ -346,9 +360,9 @@ export default function RegistrationForm({ onSuccess }) {
             )}
           </button>
 
-          <p className="flex items-center justify-center gap-1.5 text-center text-[11px] text-slate-400">
-            <ShieldCheck size={12} className="text-brand-lime" />
-            Your registration is secure. We&apos;ll never share your information.
+          <p className="flex items-start justify-center gap-1.5 text-center text-[11px] text-slate-400">
+            <ShieldCheck size={12} className="mt-[3px] flex-shrink-0 text-brand-lime" />
+            <span>Your registration is secure. We&apos;ll never share your information.</span>
           </p>
         </form>
       </div>

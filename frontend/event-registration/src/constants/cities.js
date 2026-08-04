@@ -1,21 +1,45 @@
 export const SOUTH_INDIAN_CITIES = [
-  'Ariyalur', 'Chennai', 'Coimbatore', 'Cuddalore', 'Dharmapuri', 'Dindigul',
-  'Erode', 'Hosur', 'Kanchipuram', 'Karaikudi', 'Karur', 'Krishnagiri',
-  'Kumbakonam', 'Madurai', 'Nagapattinam', 'Nagercoil', 'Namakkal', 'Nilgiris',
-  'Perambalur', 'Pollachi', 'Pudukkottai', 'Rajapalayam', 'Ramanathapuram',
-  'Ranipet', 'Salem', 'Sivakasi', 'Thanjavur', 'Theni', 'Thoothukudi (Tuticorin)',
-  'Tiruchirappalli (Trichy)', 'Tirunelveli', 'Tiruppur', 'Tiruvannamalai',
-  'Udhagamandalam (Ooty)', 'Vellore', 'Villupuram', 'Virudhunagar',
-  'Alappuzha', 'Ernakulam', 'Idukki', 'Kannur', 'Kasaragod', 'Kochi',
-  'Kollam', 'Kottayam', 'Kozhikode', 'Malappuram', 'Palakkad',
+  // Tamil Nadu
+  'Ariyalur', 'Ambur', 'Avadi', 'Chengalpattu', 'Chennai', 'Coimbatore',
+  'Cuddalore', 'Dharmapuri', 'Dindigul', 'Erode', 'Hosur', 'Kallakurichi',
+  'Kanchipuram', 'Kanyakumari (Nagercoil)', 'Karaikudi', 'Karur', 'Krishnagiri',
+  'Kumbakonam', 'Madurai', 'Mayiladuthurai', 'Nagapattinam', 'Namakkal',
+  'Nilgiris (Udhagamandalam / Ooty)', 'Perambalur', 'Pollachi', 'Pudukkottai',
+  'Rajapalayam', 'Ramanathapuram', 'Ranipet', 'Salem', 'Sivaganga', 'Sivakasi',
+  'Tambaram', 'Tenkasi', 'Thanjavur', 'Theni', 'Thoothukudi (Tuticorin)',
+  'Tiruchirappalli (Trichy)', 'Tirunelveli', 'Tirupathur', 'Tiruppur',
+  'Tiruvallur', 'Tiruvannamalai', 'Tiruvarur', 'Vaniyambadi', 'Vellore',
+  'Viluppuram', 'Virudhunagar',
+
+  // Kerala
+  'Alappuzha', 'Ernakulam (Kochi)', 'Idukki', 'Kannur', 'Kasaragod',
+  'Kollam', 'Kottayam', 'Kozhikode (Calicut)', 'Malappuram', 'Palakkad',
   'Pathanamthitta', 'Thiruvananthapuram', 'Thrissur', 'Wayanad',
-  'Ballari', 'Belagavi', 'Bengaluru', 'Bidar', 'Chikkamagaluru', 'Davanagere',
-  'Dharwad', 'Hassan', 'Hubballi', 'Kalaburagi', 'Mandya', 'Mangaluru',
-  'Mysuru', 'Raichur', 'Shivamogga', 'Tumakuru', 'Udupi', 'Vijayapura',
-  'Anantapur', 'Chittoor', 'Eluru', 'Guntur', 'Kadapa', 'Kakinada',
-  'Kurnool', 'Nellore', 'Ongole', 'Rajahmundry', 'Srikakulam', 'Tirupati',
-  'Vijayawada', 'Visakhapatnam', 'Vizianagaram',
-  'Adilabad', 'Hyderabad', 'Karimnagar', 'Khammam', 'Mahbubnagar', 'Nalgonda',
-  'Nizamabad', 'Ramagundam', 'Secunderabad', 'Warangal',
-  'Karaikal', 'Mahe', 'Puducherry', 'Yanam',
+
+  // Karnataka
+  'Bagalkot', 'Ballari (Bellary)', 'Belagavi (Belgaum)', 'Bengaluru',
+  'Bengaluru Rural', 'Bidar', 'Chamarajanagar', 'Chikkaballapur',
+  'Chikkamagaluru', 'Chitradurga', 'Davanagere', 'Dharwad', 'Gadag',
+  'Hassan', 'Haveri', 'Hubballi', 'Kalaburagi (Gulbarga)', 'Kolar',
+  'Koppal', 'Madikeri (Kodagu)', 'Mandya', 'Mangaluru', 'Mysuru',
+  'Raichur', 'Ramanagara', 'Shivamogga', 'Sirsi', 'Tumakuru', 'Udupi',
+  'Vijayapura (Bijapur)', 'Yadgir',
+
+  // Andhra Pradesh
+  'Anakapalle', 'Anantapur', 'Bapatla', 'Chilakaluripet', 'Chittoor',
+  'Dharmavaram', 'Eluru', 'Gudivada', 'Guntakal', 'Guntur', 'Kadapa (YSR)',
+  'Kadiri', 'Kakinada', 'Kandukur', 'Kurnool', 'Machilipatnam', 'Nandyal',
+  'Narasaraopet', 'Nellore (SPSR Nellore)', 'Ongole', 'Prakasam',
+  'Proddatur', 'Rajahmundry', 'Srikakulam', 'Tenali', 'Tirupati',
+  'Vijayawada', 'Visakhapatnam', 'Vizianagaram', 'West Godavari (Bhimavaram)',
+
+  // Telangana
+  'Adilabad', 'Hyderabad', 'Jagtial', 'Karimnagar', 'Khammam',
+  'Kothagudem', 'Mahbubnagar', 'Mancherial', 'Medak', 'Miryalaguda',
+  'Nalgonda', 'Nirmal', 'Nizamabad', 'Ramagundam', 'Sangareddy',
+  'Secunderabad', 'Siddipet', 'Suryapet', 'Vikarabad', 'Warangal',
+
+  // Union Territories
+  'Karaikal', 'Kavaratti (Lakshadweep)', 'Mahe', 'Port Blair (Andaman & Nicobar)',
+  'Puducherry', 'Yanam',
 ];

@@ -49,21 +49,36 @@ const getProfile = asyncHandler(async (req, res) => {
   res.json({ success: true, data: admin });
 });
 
-const listVisitors = asyncHandler(async (req, res) => {
-  const page = req.query.page || 1;
-  const limit = req.query.limit || 20;
-  const search = req.query.search || '';
+function buildVisitorWhere(search, status) {
+  const where = {};
 
-  const where = search
-    ? {
-        OR: [
-          { fullName: { contains: search } },
-          { email: { contains: search } },
-          { mobileNumber: { contains: search } },
-          { registrationId: { contains: search } },
-        ],
-      }
-    : {};
+  if (search) {
+    where.OR = [
+      { fullName: { contains: search } },
+      { email: { contains: search } },
+      { mobileNumber: { contains: search } },
+      { registrationId: { contains: search } },
+    ];
+  }
+
+  if (status === 'checkedIn') {
+    where.checkedIn = true;
+  } else if (status === 'notCheckedIn') {
+    where.checkedIn = false;
+  } else if (status === 'pending') {
+    where.emailStatus = 'PENDING';
+  }
+
+  return where;
+}
+
+const listVisitors = asyncHandler(async (req, res) => {
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const limit = Math.max(1, Number(req.query.limit) || 10); 
+  const search = req.query.search || '';
+  const status = req.query.status || 'all';
+
+  const where = buildVisitorWhere(search, status);
 
   const [visitors, total] = await Promise.all([
     prisma.visitor.findMany({
@@ -89,10 +104,12 @@ const listVisitors = asyncHandler(async (req, res) => {
     prisma.visitor.count({ where }),
   ]);
 
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
   res.json({
     success: true,
     data: visitors,
-    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    pagination: { page, limit, total, totalPages },
   });
 });
 
@@ -109,18 +126,11 @@ const getVisitorDetail = asyncHandler(async (req, res) => {
 const exportVisitors = asyncHandler(async (req, res) => {
   const format = (req.query.format || 'csv').toLowerCase();
   const search = req.query.search || '';
+  const status = req.query.status || 'all';
 
-  const where = search
-    ? {
-        OR: [
-          { fullName: { contains: search } },
-          { email: { contains: search } },
-          { mobileNumber: { contains: search } },
-          { registrationId: { contains: search } },
-        ],
-      }
-    : {};
+  const where = buildVisitorWhere(search, status);
 
+  
   const visitors = await prisma.visitor.findMany({
     where,
     orderBy: { createdAt: 'desc' },

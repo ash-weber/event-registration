@@ -12,8 +12,8 @@ model Visitor {
   registrationId    String      @unique @db.VarChar(30)
   fullName          String      @db.VarChar(120)
   email             String      @db.VarChar(160)
-  mobileNumber      String      @db.VarChar(20)
   company           String?     @db.VarChar(160)
+  mobileNumber String @unique @db.VarChar(20)
   designation       String?     @db.VarChar(120)
   city              String?     @db.VarChar(100)
   numberOfAttendees Int?        @default(1) @db.SmallInt

@@ -129,31 +129,37 @@ export default function QRPassCard({ data, onReset }) {
               </div>
             </div>
 
+            {/* FIX 2: center-align the content (icon + text) inside each date/venue cell */}
             <div className="grid grid-cols-2 divide-x divide-slate-100 rounded-lg border border-slate-200">
               {TOP_INFO.map(({ icon: Icon, key }) => (
-                <div key={key} className="flex items-center gap-1.5 px-2 py-2">
+                <div
+                  key={key}
+                  className="flex flex-col items-center justify-center gap-1 px-2 py-2 text-center"
+                >
                   <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-rose-700 text-white">
                     <Icon size={12} />
                   </span>
-                  <span className="whitespace-pre-line text-[10px] font-bold leading-tight text-slate-900 sm:text-sm">
+                  <span className="whitespace-pre-line text-center text-[10px] font-bold leading-tight text-slate-900 sm:text-sm">
                     {topValues[key]}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className="flex flex-col gap-2 px-1 sm:gap-3.5 sm:px-2">
-              {infoRows.map(({ label, key }) => (
-                <p key={key} className="flex text-[11px] sm:text-sm">
-                  <span className="w-[110px] flex-shrink-0 font-bold text-rose-700 sm:w-[160px]">
-                    {label}
-                  </span>
-                  <span className="mr-2 text-slate-400">:</span>
-                  <span className="break-words font-semibold text-slate-900">
-                    {values[key]}
-                  </span>
-                </p>
-              ))}
+            <div className="flex justify-center px-1 sm:px-2">
+              <div className="inline-flex flex-col gap-2 sm:gap-3.5">
+                {infoRows.map(({ label, key }) => (
+                  <p key={key} className="flex text-[11px] sm:text-sm">
+                    <span className="w-[110px] flex-shrink-0 font-bold text-rose-700 sm:w-[160px]">
+                      {label}
+                    </span>
+                    <span className="mr-2 text-slate-400">:</span>
+                    <span className="break-words font-semibold text-slate-900">
+                      {values[key]}
+                    </span>
+                  </p>
+                ))}
+              </div>
             </div>
 
             <div className="flex justify-center">

@@ -21,7 +21,7 @@ import api from '../api/axios';
 import { EmailStatusBadge, CheckInBadge } from '../components/StatusBadge';
 import VisitorDetailModal from '../components/VisitorDetailModal';
 
-const LIMIT = 20;
+const LIMIT = 10; 
 
 const ALL_VISITORS_PAGE_SIZE = 100;
 
@@ -65,7 +65,6 @@ export default function VisitorsListPage() {
   const [activeVisitorId, setActiveVisitorId] = useState(null);
   const [downloadingId, setDownloadingId] = useState(null);
 
-  
   const [stats, setStats] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
 
@@ -77,12 +76,18 @@ export default function VisitorsListPage() {
   const [exporting, setExporting] = useState(null);
   const exportRef = useRef(null);
 
+  
   const fetchVisitors = useCallback(async (opts) => {
     setLoading(true);
     setError('');
     try {
       const res = await api.get('/admin/visitors', {
-        params: { page: opts.page, limit: LIMIT, search: opts.search || undefined },
+        params: {
+          page: opts.page,
+          limit: LIMIT,
+          search: opts.search || undefined,
+          status: opts.status && opts.status !== 'all' ? opts.status : undefined,
+        },
       });
       setVisitors(res.data.data);
       setTotalPages(res.data.pagination.totalPages || 1);
@@ -97,7 +102,6 @@ export default function VisitorsListPage() {
   const fetchStats = useCallback(async () => {
     setStatsLoading(true);
     try {
-     
       const { all, total: totalVisitors } = await fetchAllVisitors(api);
       const checkedInCount = all.filter((v) => v.checkedIn).length;
       const pendingCount = all.filter((v) => v.emailStatus === 'PENDING').length;
@@ -120,14 +124,19 @@ export default function VisitorsListPage() {
   useEffect(() => {
     const handle = setTimeout(() => {
       setPage(1);
-      fetchVisitors({ page: 1, search });
+      fetchVisitors({ page: 1, search, status: statusFilter.value });
     }, 400);
     return () => clearTimeout(handle);
   }, [search]);
 
   useEffect(() => {
-    fetchVisitors({ page, search });
+    fetchVisitors({ page, search, status: statusFilter.value });
   }, [page]);
+
+  useEffect(() => {
+    setPage(1);
+    fetchVisitors({ page: 1, search, status: statusFilter.value });
+  }, [statusFilter]);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -138,18 +147,7 @@ export default function VisitorsListPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const visibleVisitors = useMemo(() => {
-    switch (statusFilter.value) {
-      case 'checkedIn':
-        return visitors.filter((v) => v.checkedIn);
-      case 'notCheckedIn':
-        return visitors.filter((v) => !v.checkedIn);
-      case 'pending':
-        return visitors.filter((v) => v.emailStatus === 'PENDING');
-      default:
-        return visitors;
-    }
-  }, [visitors, statusFilter]);
+  const visibleVisitors = visitors;
 
   const statCards = stats
     ? [
@@ -200,6 +198,19 @@ export default function VisitorsListPage() {
     return pages;
   }, [page, totalPages]);
 
+  
+  function formatRegisteredDate(createdAt) {
+    return new Date(createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+  }
+
+  function formatRegisteredTime(createdAt) {
+    return new Date(createdAt).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+
   async function handleDownload(id, e) {
     e.stopPropagation();
     setDownloadingId(id);
@@ -219,11 +230,16 @@ export default function VisitorsListPage() {
     }
   }
 
+  
   async function handleExport(format) {
     setExporting(format);
     try {
       const res = await api.get('/admin/visitors/export', {
-        params: { format, search: search || undefined },
+        params: {
+          format,
+          search: search || undefined,
+          status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
+        },
         responseType: 'blob',
       });
 
@@ -288,14 +304,14 @@ export default function VisitorsListPage() {
       </div>
 
       <div className="flex flex-shrink-0 flex-col gap-2.5 rounded-t-xl border border-b-0 border-slate-100 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:max-w-xs">
+        <div className="relative w-full sm:max-w-md lg:max-w-lg">
           <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
             <Search size={16} />
           </span>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email or registration ID..."
+            placeholder="Search name, email, mobile, ID"
             className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2"
             style={{ '--tw-ring-color': `${GREEN}55` }}
           />
@@ -365,7 +381,6 @@ export default function VisitorsListPage() {
             )}
           </div>
 
-          {/* Export dropdown */}
           <div className="relative" ref={exportRef}>
             <button
               type="button"
@@ -451,15 +466,21 @@ export default function VisitorsListPage() {
 
           {!loading && !error && visibleVisitors.length > 0 && (
             <div className="divide-y divide-slate-100 sm:hidden">
-              {visibleVisitors.map((v) => (
+              {visibleVisitors.map((v, idx) => (
                 <div key={v.id} className="px-4 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold" style={{ color: NAVY }}>
+                      <p className="flex items-center gap-1.5 truncate text-sm font-semibold" style={{ color: NAVY }}>
+                        <span className="text-xs font-normal text-slate-400">
+                          #{(page - 1) * LIMIT + idx + 1}
+                        </span>
                         {v.fullName}
                       </p>
                       <p className="truncate text-xs text-slate-500">{v.email}</p>
                       <p className="mt-0.5 text-xs text-slate-400">{v.mobileNumber}</p>
+                      <p className="mt-0.5 text-xs text-slate-400">
+                        {formatRegisteredDate(v.createdAt)} · {formatRegisteredTime(v.createdAt)}
+                      </p>
                     </div>
                     <span className="flex-shrink-0 whitespace-nowrap text-[11px] font-medium text-slate-400">
                       {v.registrationId}
@@ -507,19 +528,24 @@ export default function VisitorsListPage() {
               <table className="w-full text-left text-sm">
                 <thead className="sticky top-0 z-10">
                   <tr className="border-b border-slate-100 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+                    <th className="px-4 py-2.5 font-semibold">S.No</th>
                     <th className="px-4 py-2.5 font-semibold">ID</th>
                     <th className="px-4 py-2.5 font-semibold">Name</th>
                     <th className="px-4 py-2.5 font-semibold">Email</th>
                     <th className="px-4 py-2.5 font-semibold">Mobile</th>
                     <th className="px-4 py-2.5 font-semibold">Registered</th>
+                    <th className="px-4 py-2.5 font-semibold">Reg. Time</th>
                     <th className="px-4 py-2.5 font-semibold">Email</th>
                     <th className="px-4 py-2.5 font-semibold">Check-in</th>
                     <th className="px-4 py-2.5 font-semibold">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {visibleVisitors.map((v) => (
+                  {visibleVisitors.map((v, idx) => (
                     <tr key={v.id} className="hover:bg-slate-50">
+                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-500">
+                        {(page - 1) * LIMIT + idx + 1}
+                      </td>
                       <td className="whitespace-nowrap px-4 py-2.5 text-xs font-medium" style={{ color: NAVY }}>
                         {v.registrationId}
                       </td>
@@ -527,7 +553,10 @@ export default function VisitorsListPage() {
                       <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-500">{v.email}</td>
                       <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-500">{v.mobileNumber}</td>
                       <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-500">
-                        {new Date(v.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                        {formatRegisteredDate(v.createdAt)}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-500">
+                        {formatRegisteredTime(v.createdAt)}
                       </td>
                       <td className="whitespace-nowrap px-4 py-2.5">
                         <EmailStatusBadge status={v.emailStatus} />
