@@ -21,7 +21,7 @@ import api from '../api/axios';
 import { EmailStatusBadge, CheckInBadge } from '../components/StatusBadge';
 import VisitorDetailModal from '../components/VisitorDetailModal';
 
-const LIMIT = 10; 
+const LIMIT = 10; // 10 visitors per page
 
 const ALL_VISITORS_PAGE_SIZE = 100;
 
@@ -121,6 +121,7 @@ export default function VisitorsListPage() {
     fetchStats();
   }, [fetchStats]);
 
+  // debounce search
   useEffect(() => {
     const handle = setTimeout(() => {
       setPage(1);
@@ -129,10 +130,12 @@ export default function VisitorsListPage() {
     return () => clearTimeout(handle);
   }, [search]);
 
+  // refetch when page changes
   useEffect(() => {
     fetchVisitors({ page, search, status: statusFilter.value });
   }, [page]);
 
+  // refetch (reset to page 1) whenever the status filter changes
   useEffect(() => {
     setPage(1);
     fetchVisitors({ page: 1, search, status: statusFilter.value });
@@ -147,6 +150,8 @@ export default function VisitorsListPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // No more client-side re-filtering — the backend already returns exactly
+  // the rows that belong on this page for the current search + status.
   const visibleVisitors = visitors;
 
   const statCards = stats
@@ -198,7 +203,8 @@ export default function VisitorsListPage() {
     return pages;
   }, [page, totalPages]);
 
-  
+  // Format helpers: date + time split out so we can show an explicit
+  // "Registration Time" column (e.g. "9:00 AM") alongside the date.
   function formatRegisteredDate(createdAt) {
     return new Date(createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
   }
@@ -230,7 +236,8 @@ export default function VisitorsListPage() {
     }
   }
 
-  
+  // Export always pulls the FULL matching list from the backend
+  // (search + current status filter), not just the current page.
   async function handleExport(format) {
     setExporting(format);
     try {
@@ -304,14 +311,14 @@ export default function VisitorsListPage() {
       </div>
 
       <div className="flex flex-shrink-0 flex-col gap-2.5 rounded-t-xl border border-b-0 border-slate-100 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:max-w-md lg:max-w-lg">
+        <div className="relative w-full sm:max-w-lg lg:max-w-2xl">
           <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
             <Search size={16} />
           </span>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search name, email, mobile, ID"
+            placeholder="Search name, email, mobile, ID..."
             className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2"
             style={{ '--tw-ring-color': `${GREEN}55` }}
           />
@@ -381,6 +388,7 @@ export default function VisitorsListPage() {
             )}
           </div>
 
+          {/* Export dropdown */}
           <div className="relative" ref={exportRef}>
             <button
               type="button"
