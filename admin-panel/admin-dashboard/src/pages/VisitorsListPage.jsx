@@ -21,7 +21,7 @@ import api from '../api/axios';
 import { EmailStatusBadge, CheckInBadge } from '../components/StatusBadge';
 import VisitorDetailModal from '../components/VisitorDetailModal';
 
-const LIMIT = 10; // 10 visitors per page
+const LIMIT = 10;
 
 const ALL_VISITORS_PAGE_SIZE = 100;
 
@@ -150,8 +150,7 @@ export default function VisitorsListPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // No more client-side re-filtering — the backend already returns exactly
-  // the rows that belong on this page for the current search + status.
+ 
   const visibleVisitors = visitors;
 
   const statCards = stats
@@ -236,8 +235,7 @@ export default function VisitorsListPage() {
     }
   }
 
-  // Export always pulls the FULL matching list from the backend
-  // (search + current status filter), not just the current page.
+  
   async function handleExport(format) {
     setExporting(format);
     try {
@@ -388,7 +386,6 @@ export default function VisitorsListPage() {
             )}
           </div>
 
-          {/* Export dropdown */}
           <div className="relative" ref={exportRef}>
             <button
               type="button"
