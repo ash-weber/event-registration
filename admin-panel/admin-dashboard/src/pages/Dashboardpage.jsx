@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   Users,
   CheckCircle2,
@@ -43,15 +43,20 @@ async function fetchAllVisitors() {
 }
 
 export default function DashboardPage() {
- 
   const { rangeDays } = useOutletContext();
   const [stats, setStats] = useState(null);
- 
+
   const [checkedInCount, setCheckedInCount] = useState(null);
   const [chartData, setChartData] = useState([]);
   const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // --- horizontal mouse-drag / wheel scrolling for the recent-registrations table ---
+  const tableScrollRef = useRef(null);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, scrollLeft: 0 });
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -82,6 +87,38 @@ export default function DashboardPage() {
       active = false;
     };
   }, [rangeDays]);
+
+  const handleTableWheel = useCallback((e) => {
+    const el = tableScrollRef.current;
+    if (!el) return;
+    if (el.scrollWidth <= el.clientWidth) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      el.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }, []);
+
+  const handleTableMouseDown = useCallback((e) => {
+    const el = tableScrollRef.current;
+    if (!el || el.scrollWidth <= el.clientWidth) return;
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    dragStartRef.current = { x: e.pageX, scrollLeft: el.scrollLeft };
+  }, []);
+
+  const handleTableMouseMove = useCallback((e) => {
+    if (!isDraggingRef.current) return;
+    const el = tableScrollRef.current;
+    if (!el) return;
+    e.preventDefault();
+    const dx = e.pageX - dragStartRef.current.x;
+    el.scrollLeft = dragStartRef.current.scrollLeft - dx;
+  }, []);
+
+  const stopTableDrag = useCallback(() => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+  }, []);
 
   const todayKey = (() => {
     const d = new Date();
@@ -299,57 +336,74 @@ export default function DashboardPage() {
         )}
 
         {!loading && recent.length > 0 && (
-          <div className="hidden overflow-x-auto sm:block [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-y border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                  <th className="px-5 py-3 font-semibold sm:px-6">ID</th>
-                  <th className="px-5 py-3 font-semibold sm:px-6">Name</th>
-                  <th className="px-5 py-3 font-semibold sm:px-6">Email</th>
-                  <th className="px-5 py-3 font-semibold sm:px-6">Mobile</th>
-                  <th className="px-5 py-3 font-semibold sm:px-6">Date</th>
-                  <th className="px-5 py-3 font-semibold sm:px-6">QR Status</th>
-                  <th className="px-5 py-3 font-semibold sm:px-6">Status</th>
-                  <th className="px-5 py-3 font-semibold sm:px-6">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {recent.map((v) => (
-                  <tr key={v.id} className="hover:bg-slate-50">
-                    <td className="whitespace-nowrap px-5 py-3 font-medium text-brand-navy sm:px-6">
-                      {v.registrationId}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3 sm:px-6">{v.fullName}</td>
-                    <td className="whitespace-nowrap px-5 py-3 text-slate-500 sm:px-6">{v.email}</td>
-                    <td className="whitespace-nowrap px-5 py-3 text-slate-500 sm:px-6">{v.mobileNumber}</td>
-                    <td className="whitespace-nowrap px-5 py-3 text-slate-500 sm:px-6">
-                      {new Date(v.createdAt).toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3 sm:px-6">
-                      <EmailStatusBadge status={v.emailStatus} />
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3 sm:px-6">
-                      <CheckInBadge checkedIn={v.checkedIn} />
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3 sm:px-6">
-                      <Link
-                        to="/visitors"
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-brand-navy"
-                        aria-label={`View ${v.fullName}`}
-                      >
-                        <Eye size={16} />
-                      </Link>
-                    </td>
+          <div className="px-4 pb-1 pt-0 sm:px-6">
+           
+            <div
+              ref={tableScrollRef}
+              onWheel={handleTableWheel}
+              onMouseDown={handleTableMouseDown}
+              onMouseMove={handleTableMouseMove}
+              onMouseUp={stopTableDrag}
+              onMouseLeave={stopTableDrag}
+              className={`hidden overflow-x-auto rounded-lg border border-slate-100 sm:block
+                [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-slate-100
+                [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300
+                hover:[&::-webkit-scrollbar-thumb]:bg-slate-400
+                [scrollbar-width:thin] [scrollbar-color:#cbd5e1_#f1f5f9]
+                ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
+            >
+              <table className="w-full text-left text-sm" style={{ minWidth: '760px' }}>
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                    <th className="px-5 py-3 font-semibold sm:px-6">ID</th>
+                    <th className="px-5 py-3 font-semibold sm:px-6">Name</th>
+                    <th className="px-5 py-3 font-semibold sm:px-6">Email</th>
+                    <th className="px-5 py-3 font-semibold sm:px-6">Mobile</th>
+                    <th className="px-5 py-3 font-semibold sm:px-6">Date</th>
+                    <th className="px-5 py-3 font-semibold sm:px-6">QR Status</th>
+                    <th className="px-5 py-3 font-semibold sm:px-6">Status</th>
+                    <th className="px-5 py-3 font-semibold sm:px-6">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {recent.map((v) => (
+                    <tr key={v.id} className="hover:bg-slate-50">
+                      <td className="whitespace-nowrap px-5 py-3 font-medium text-brand-navy sm:px-6">
+                        {v.registrationId}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-3 sm:px-6">{v.fullName}</td>
+                      <td className="whitespace-nowrap px-5 py-3 text-slate-500 sm:px-6">{v.email}</td>
+                      <td className="whitespace-nowrap px-5 py-3 text-slate-500 sm:px-6">{v.mobileNumber}</td>
+                      <td className="whitespace-nowrap px-5 py-3 text-slate-500 sm:px-6">
+                        {new Date(v.createdAt).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-3 sm:px-6">
+                        <EmailStatusBadge status={v.emailStatus} />
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-3 sm:px-6">
+                        <CheckInBadge checkedIn={v.checkedIn} />
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-3 sm:px-6">
+                        <Link
+                          to="/visitors"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-brand-navy"
+                          aria-label={`View ${v.fullName}`}
+                        >
+                          <Eye size={16} />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
+        {!loading && recent.length > 0 && <div className="h-3 sm:h-1" />}
       </div>
     </div>
   );

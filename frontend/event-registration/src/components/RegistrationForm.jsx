@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { UserRound, Mail, Phone, Building2, IdCard, Users, Loader2, Leaf, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
-import logoImg from '../assets/tab.png';
+import logoImg from '../assets/logo.png';
 import CityAutocomplete from './CityAutocomplete';
 
 const initialForm = {
@@ -156,19 +156,21 @@ export default function RegistrationForm({ onSuccess }) {
       `}</style>
 
       <div className="w-full rounded-[calc(1rem-2px)] bg-white p-4 sm:p-6 transition-transform duration-500 ease-out">
-        <div className="flex flex-col items-center justify-center gap-2 text-center sm:flex-row sm:gap-3">
-          <span className="flex h-9 w-9 sm:h-11 sm:w-11 flex-shrink-0 items-center justify-center rounded-full text-white overflow-hidden transition-transform duration-500 ease-out">
+        <div className="flex flex-col items-center justify-center gap-2 text-center">
+          <span className="flex h-14 sm:h-20 flex-shrink-0 items-center justify-center transition-transform duration-500 ease-out">
             <img
               src={logoImg}
               alt="Interio & Exterio Expo Logo"
-              className="h-full w-full object-cover"
+              className="h-full w-auto object-contain"
             />
           </span>
-          <div className="min-w-0 text-center sm:text-left">
-            <h2 className="text-base sm:text-xl font-bold leading-tight text-brand-navy truncate">
-              INTERIO & EXTERIO EXPO
+          <div className="min-w-0 text-center">
+            <h2 className="text-lg sm:text-2xl font-bold leading-tight text-brand-navy break-words">
+              INTERIO & EXTERIO EXPO 2026
             </h2>
-            <p className="text-[11px] sm:text-xs text-slate-500">Fill your details to register</p>
+            <p className="text-[11px] sm:text-sm text-slate-500 mt-0.5">
+              Fill your details to register
+            </p>
           </div>
         </div>
 

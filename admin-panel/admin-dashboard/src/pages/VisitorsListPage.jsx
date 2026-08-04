@@ -76,7 +76,12 @@ export default function VisitorsListPage() {
   const [exporting, setExporting] = useState(null);
   const exportRef = useRef(null);
 
-  
+  // --- horizontal mouse-drag / wheel scrolling for the desktop table ---
+  const tableScrollRef = useRef(null);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, scrollLeft: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+
   const fetchVisitors = useCallback(async (opts) => {
     setLoading(true);
     setError('');
@@ -135,7 +140,6 @@ export default function VisitorsListPage() {
     fetchVisitors({ page, search, status: statusFilter.value });
   }, [page]);
 
-  // refetch (reset to page 1) whenever the status filter changes
   useEffect(() => {
     setPage(1);
     fetchVisitors({ page: 1, search, status: statusFilter.value });
@@ -150,7 +154,38 @@ export default function VisitorsListPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
- 
+  const handleTableWheel = useCallback((e) => {
+    const el = tableScrollRef.current;
+    if (!el) return;
+    if (el.scrollWidth <= el.clientWidth) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      el.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }, []);
+
+  const handleTableMouseDown = useCallback((e) => {
+    const el = tableScrollRef.current;
+    if (!el || el.scrollWidth <= el.clientWidth) return;
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    dragStartRef.current = { x: e.pageX, scrollLeft: el.scrollLeft };
+  }, []);
+
+  const handleTableMouseMove = useCallback((e) => {
+    if (!isDraggingRef.current) return;
+    const el = tableScrollRef.current;
+    if (!el) return;
+    e.preventDefault();
+    const dx = e.pageX - dragStartRef.current.x;
+    el.scrollLeft = dragStartRef.current.scrollLeft - dx;
+  }, []);
+
+  const stopTableDrag = useCallback(() => {
+    isDraggingRef.current = false;
+    setIsDragging(false);
+  }, []);
+
   const visibleVisitors = visitors;
 
   const statCards = stats
@@ -202,8 +237,6 @@ export default function VisitorsListPage() {
     return pages;
   }, [page, totalPages]);
 
-  // Format helpers: date + time split out so we can show an explicit
-  // "Registration Time" column (e.g. "9:00 AM") alongside the date.
   function formatRegisteredDate(createdAt) {
     return new Date(createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
   }
@@ -235,7 +268,6 @@ export default function VisitorsListPage() {
     }
   }
 
-  
   async function handleExport(format) {
     setExporting(format);
     try {
@@ -267,40 +299,40 @@ export default function VisitorsListPage() {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3">
+    <div className="flex h-full min-h-0 flex-col gap-2.5">
       <div className="flex-shrink-0">
-        <h1 className="text-lg font-bold sm:text-xl" style={{ color: NAVY }}>
+        <h1 className="text-base font-bold sm:text-lg" style={{ color: NAVY }}>
           Registered Visitors
         </h1>
-        <p className="text-xs text-slate-400">
+        <p className="text-[11px] text-slate-400">
           Dashboard <span className="mx-1">›</span> Registered Visitors
         </p>
       </div>
 
-      <div className="grid flex-shrink-0 grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
+      <div className="grid flex-shrink-0 grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4">
         {statsLoading && !stats
           ? Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="flex h-[64px] items-center justify-center rounded-xl border border-slate-100 bg-white shadow-sm sm:h-[72px]"
+                className="flex h-[54px] items-center justify-center rounded-lg border border-slate-100 bg-white shadow-sm sm:h-[60px]"
               >
-                <Loader2 className="animate-spin" style={{ color: NAVY }} size={18} />
+                <Loader2 className="animate-spin" style={{ color: NAVY }} size={16} />
               </div>
             ))
           : statCards.map((card) => (
               <div
                 key={card.label}
-                className="flex items-center gap-2.5 rounded-xl border border-slate-100 bg-white px-3 py-2.5 shadow-sm sm:gap-3 sm:px-4 sm:py-3"
+                className="flex items-center gap-2 rounded-lg border border-slate-100 bg-white px-2.5 py-2 shadow-sm sm:gap-2.5 sm:px-3 sm:py-2.5"
               >
                 <span
-                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10"
+                  className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg sm:h-8 sm:w-8"
                   style={{ backgroundColor: card.bg, color: card.color }}
                 >
-                  <card.icon size={17} />
+                  <card.icon size={14} />
                 </span>
                 <div className="min-w-0">
-                  <p className="truncate text-[11px] text-slate-500 sm:text-xs">{card.label}</p>
-                  <p className="text-lg font-bold leading-tight sm:text-xl" style={{ color: NAVY }}>
+                  <p className="truncate text-[10px] text-slate-500 sm:text-[11px]">{card.label}</p>
+                  <p className="text-base font-bold leading-tight sm:text-lg" style={{ color: NAVY }}>
                     {card.value}
                   </p>
                 </div>
@@ -308,37 +340,37 @@ export default function VisitorsListPage() {
             ))}
       </div>
 
-      <div className="flex flex-shrink-0 flex-col gap-2.5 rounded-t-xl border border-b-0 border-slate-100 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:max-w-lg lg:max-w-2xl">
-          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
-            <Search size={16} />
+      <div className="flex flex-shrink-0 flex-wrap sm:flex-nowrap items-center justify-between gap-2 rounded-t-lg border border-b-0 border-slate-100 bg-white p-2.5 shadow-sm">
+        <div className="relative w-full flex-1 min-w-[200px] sm:max-w-md lg:max-w-lg">
+          <span className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center text-slate-400">
+            <Search size={14} />
           </span>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search name, email, mobile, ID..."
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2"
+            className="w-full rounded-md border border-slate-200 bg-white py-1.5 pl-8 pr-3 text-xs focus:outline-none focus:ring-2"
             style={{ '--tw-ring-color': `${GREEN}55` }}
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-shrink-0 flex-wrap items-center gap-1.5">
           <div className="relative" ref={statusRef}>
             <button
               type="button"
               onClick={() => setStatusOpen((o) => !o)}
-              className="flex items-center gap-2 rounded-lg border bg-white py-2 pl-2.5 pr-3 text-xs font-semibold shadow-sm transition cursor-pointer"
+              className="flex items-center gap-1.5 rounded-md border bg-white py-1.5 pl-2 pr-2.5 text-xs font-semibold shadow-sm transition cursor-pointer"
               style={{ borderColor: statusOpen ? `${statusFilter.color}66` : '#e2e8f0' }}
             >
               <span
-                className="flex h-6 w-6 items-center justify-center rounded-md"
+                className="flex h-5 w-5 items-center justify-center rounded-md"
                 style={{ backgroundColor: `${statusFilter.color}1a`, color: statusFilter.color }}
               >
-                <statusFilter.icon size={13} />
+                <statusFilter.icon size={11} />
               </span>
               <span className="text-slate-700">{statusFilter.label}</span>
               <ChevronDown
-                size={13}
+                size={12}
                 className={`text-slate-400 transition-transform ${statusOpen ? 'rotate-180' : ''}`}
               />
             </button>
@@ -390,12 +422,12 @@ export default function VisitorsListPage() {
             <button
               type="button"
               onClick={() => setExportOpen((o) => !o)}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-white shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-white shadow-sm cursor-pointer"
               style={{ backgroundColor: NAVY }}
             >
-              <Download size={13} />
+              <Download size={12} />
               Export
-              <ChevronDown size={13} />
+              <ChevronDown size={12} />
             </button>
             {exportOpen && (
               <div className="absolute right-0 z-30 mt-2 w-44 max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
@@ -450,21 +482,21 @@ export default function VisitorsListPage() {
         </div>
       )}
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-b-xl border border-slate-100 bg-white shadow-sm">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-b-lg border border-slate-100 bg-white shadow-sm">
         <div className="min-h-0 flex-1 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {loading && (
-            <div className="py-10 text-center">
-              <Loader2 className="mx-auto animate-spin" style={{ color: NAVY }} size={22} />
+            <div className="py-8 text-center">
+              <Loader2 className="mx-auto animate-spin" style={{ color: NAVY }} size={20} />
             </div>
           )}
 
           {!loading && error && (
-            <p className="py-8 text-center text-sm text-red-500">{error}</p>
+            <p className="py-6 text-center text-xs text-red-500">{error}</p>
           )}
 
           {!loading && !error && visibleVisitors.length === 0 && (
-            <div className="py-10 text-center text-sm text-slate-400">
-              <Inbox className="mx-auto mb-2" size={22} />
+            <div className="py-8 text-center text-xs text-slate-400">
+              <Inbox className="mx-auto mb-2" size={20} />
               No visitors found.
             </div>
           )}
@@ -472,22 +504,28 @@ export default function VisitorsListPage() {
           {!loading && !error && visibleVisitors.length > 0 && (
             <div className="divide-y divide-slate-100 sm:hidden">
               {visibleVisitors.map((v, idx) => (
-                <div key={v.id} className="px-4 py-3">
+                <div key={v.id} className="px-3 py-2.5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="flex items-center gap-1.5 truncate text-sm font-semibold" style={{ color: NAVY }}>
-                        <span className="text-xs font-normal text-slate-400">
+                      <p className="flex items-center gap-1.5 truncate text-xs font-semibold" style={{ color: NAVY }}>
+                        <span className="text-[10px] font-normal text-slate-400">
                           #{(page - 1) * LIMIT + idx + 1}
                         </span>
                         {v.fullName}
                       </p>
-                      <p className="truncate text-xs text-slate-500">{v.email}</p>
-                      <p className="mt-0.5 text-xs text-slate-400">{v.mobileNumber}</p>
-                      <p className="mt-0.5 text-xs text-slate-400">
+                      <p className="truncate text-[11px] text-slate-500">{v.email}</p>
+                      <p className="mt-0.5 text-[11px] text-slate-400">{v.mobileNumber}</p>
+                      {(v.company || v.city) && (
+                        <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                          {[v.company, v.city].filter(Boolean).join(' · ')}
+                        </p>
+                      )}
+                      <p className="mt-0.5 text-[11px] text-slate-400">
                         {formatRegisteredDate(v.createdAt)} · {formatRegisteredTime(v.createdAt)}
+                        {v.numberOfAttendees ? ` · ${v.numberOfAttendees} attending` : ''}
                       </p>
                     </div>
-                    <span className="flex-shrink-0 whitespace-nowrap text-[11px] font-medium text-slate-400">
+                    <span className="flex-shrink-0 whitespace-nowrap text-[10px] font-medium text-slate-400">
                       {v.registrationId}
                     </span>
                   </div>
@@ -501,24 +539,24 @@ export default function VisitorsListPage() {
                       <button
                         type="button"
                         onClick={() => setActiveVisitorId(v.id)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border cursor-pointer"
+                        className="flex h-7 w-7 items-center justify-center rounded-md border cursor-pointer"
                         style={{ borderColor: `${GREEN}88`, color: '#5c9e1f' }}
                         aria-label={`View ${v.fullName}`}
                       >
-                        <Eye size={14} />
+                        <Eye size={13} />
                       </button>
                       <button
                         type="button"
                         onClick={(e) => handleDownload(v.id, e)}
                         disabled={downloadingId === v.id}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border disabled:opacity-50 cursor-pointer"
+                        className="flex h-7 w-7 items-center justify-center rounded-md border disabled:opacity-50 cursor-pointer"
                         style={{ borderColor: `${NAVY}55`, color: NAVY }}
                         aria-label={`Download QR for ${v.fullName}`}
                       >
                         {downloadingId === v.id ? (
-                          <Loader2 size={14} className="animate-spin" />
+                          <Loader2 size={13} className="animate-spin" />
                         ) : (
-                          <Download size={14} />
+                          <Download size={13} />
                         )}
                       </button>
                     </div>
@@ -529,69 +567,103 @@ export default function VisitorsListPage() {
           )}
 
           {!loading && !error && visibleVisitors.length > 0 && (
-            <div className="hidden overflow-x-auto sm:block [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <table className="w-full text-left text-sm">
+            <div
+              ref={tableScrollRef}
+              onWheel={handleTableWheel}
+              onMouseDown={handleTableMouseDown}
+              onMouseMove={handleTableMouseMove}
+              onMouseUp={stopTableDrag}
+              onMouseLeave={stopTableDrag}
+              className={`hidden overflow-x-auto sm:block
+                [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-slate-100
+                [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300
+                hover:[&::-webkit-scrollbar-thumb]:bg-slate-400
+                [scrollbar-width:thin] [scrollbar-color:#cbd5e1_#f1f5f9]
+                ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
+            >
+              <table className="text-left text-xs" style={{ width: 'max-content' }}>
                 <thead className="sticky top-0 z-10">
-                  <tr className="border-b border-slate-100 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
-                    <th className="px-4 py-2.5 font-semibold">S.No</th>
-                    <th className="px-4 py-2.5 font-semibold">ID</th>
-                    <th className="px-4 py-2.5 font-semibold">Name</th>
-                    <th className="px-4 py-2.5 font-semibold">Email</th>
-                    <th className="px-4 py-2.5 font-semibold">Mobile</th>
-                    <th className="px-4 py-2.5 font-semibold">Registered</th>
-                    <th className="px-4 py-2.5 font-semibold">Reg. Time</th>
-                    <th className="px-4 py-2.5 font-semibold">Email</th>
-                    <th className="px-4 py-2.5 font-semibold">Check-in</th>
-                    <th className="px-4 py-2.5 font-semibold">Action</th>
+                  <tr className="border-b border-slate-100 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500">
+                    <th className="px-3 py-2 font-semibold">S.No</th>
+                    <th className="px-3 py-2 font-semibold">ID</th>
+                    <th className="px-3 py-2 font-semibold">Name</th>
+                    <th className="px-3 py-2 font-semibold">Email</th>
+                    <th className="px-3 py-2 font-semibold">Mobile</th>
+                    <th className="w-[140px] px-3 py-2 font-semibold">Company</th>
+                    <th className="w-[100px] px-3 py-2 font-semibold">City</th>
+                    <th className="px-3 py-2 font-semibold">Attendance</th>
+                    <th className="px-3 py-2 font-semibold">Registered</th>
+                    <th className="px-3 py-2 font-semibold">Reg. Time</th>
+                    <th className="px-3 py-2 font-semibold">Email</th>
+                    <th className="px-3 py-2 font-semibold">Check-in</th>
+                    <th className="px-3 py-2 font-semibold">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {visibleVisitors.map((v, idx) => (
                     <tr key={v.id} className="hover:bg-slate-50">
-                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-500">
+                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">
                         {(page - 1) * LIMIT + idx + 1}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-xs font-medium" style={{ color: NAVY }}>
+                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] font-medium" style={{ color: NAVY }}>
                         {v.registrationId}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-xs">{v.fullName}</td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-500">{v.email}</td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-500">{v.mobileNumber}</td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-500">
+                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px]">{v.fullName}</td>
+                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">{v.email}</td>
+                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">{v.mobileNumber}</td>
+
+                      <td
+                        className="w-[140px] max-w-[140px] truncate px-3 py-1.5 text-[11px] text-slate-500"
+                        title={v.company || ''}
+                      >
+                        {v.company || '—'}
+                      </td>
+
+                      <td
+                        className="w-[100px] max-w-[100px] truncate px-3 py-1.5 text-[11px] text-slate-500"
+                        title={v.city || ''}
+                      >
+                        {v.city || '—'}
+                      </td>
+
+                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">
+                        {v.numberOfAttendees ?? '—'}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">
                         {formatRegisteredDate(v.createdAt)}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-slate-500">
+                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">
                         {formatRegisteredTime(v.createdAt)}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5">
+                      <td className="whitespace-nowrap px-3 py-1.5">
                         <EmailStatusBadge status={v.emailStatus} />
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5">
+                      <td className="whitespace-nowrap px-3 py-1.5">
                         <CheckInBadge checkedIn={v.checkedIn} />
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5">
+                      <td className="whitespace-nowrap px-3 py-1.5">
                         <div className="flex items-center gap-1.5">
                           <button
                             type="button"
                             onClick={() => setActiveVisitorId(v.id)}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border cursor-pointer"
+                            className="flex h-6 w-6 items-center justify-center rounded-md border cursor-pointer"
                             style={{ borderColor: `${GREEN}88`, color: '#5c9e1f' }}
                             aria-label={`View ${v.fullName}`}
                           >
-                            <Eye size={13} />
+                            <Eye size={12} />
                           </button>
                           <button
                             type="button"
                             onClick={(e) => handleDownload(v.id, e)}
                             disabled={downloadingId === v.id}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg border disabled:opacity-50 cursor-pointer"
+                            className="flex h-6 w-6 items-center justify-center rounded-md border disabled:opacity-50 cursor-pointer"
                             style={{ borderColor: `${NAVY}55`, color: NAVY }}
                             aria-label={`Download QR for ${v.fullName}`}
                           >
                             {downloadingId === v.id ? (
-                              <Loader2 size={13} className="animate-spin" />
+                              <Loader2 size={12} className="animate-spin" />
                             ) : (
-                              <Download size={13} />
+                              <Download size={12} />
                             )}
                           </button>
                         </div>
@@ -604,8 +676,8 @@ export default function VisitorsListPage() {
           )}
         </div>
 
-        <div className="flex flex-shrink-0 flex-col gap-2 border-t border-slate-100 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[11px] text-slate-500">
+        <div className="flex flex-shrink-0 flex-col gap-2 border-t border-slate-100 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[10px] text-slate-500">
             Showing {visitors.length === 0 ? 0 : (page - 1) * LIMIT + 1} to{' '}
             {Math.min(page * LIMIT, total)} of {total} entries
           </p>
@@ -614,22 +686,22 @@ export default function VisitorsListPage() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+              className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
               aria-label="Previous page"
             >
-              <ChevronLeft size={14} />
+              <ChevronLeft size={13} />
             </button>
 
             {pageNumbers.map((p, idx) =>
               p === '…' ? (
-                <span key={`ellipsis-${idx}`} className="px-1 text-xs text-slate-400">
+                <span key={`ellipsis-${idx}`} className="px-1 text-[11px] text-slate-400">
                   …
                 </span>
               ) : (
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className="flex h-7 w-7 items-center justify-center rounded-md text-xs font-semibold transition cursor-pointer"
+                  className="flex h-6 w-6 items-center justify-center rounded-md text-[11px] font-semibold transition cursor-pointer"
                   style={
                     p === page
                       ? { backgroundColor: NAVY, color: '#fff' }
@@ -644,10 +716,10 @@ export default function VisitorsListPage() {
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+              className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
               aria-label="Next page"
             >
-              <ChevronRight size={14} />
+              <ChevronRight size={13} />
             </button>
           </div>
         </div>

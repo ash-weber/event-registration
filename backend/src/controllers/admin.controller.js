@@ -162,9 +162,9 @@ const exportVisitors = asyncHandler(async (req, res) => {
     city: v.city || '',
     numberOfAttendees: v.numberOfAttendees ?? 1,
     emailStatus: v.emailStatus,
+    createdAt: new Date(v.createdAt).toLocaleString('en-IN'),
     checkedIn: v.checkedIn ? 'Yes' : 'No',
     checkedInAt: v.checkedInAt ? new Date(v.checkedInAt).toLocaleString('en-IN') : '',
-    createdAt: new Date(v.createdAt).toLocaleString('en-IN'),
   }));
 
   if (format === 'excel' || format === 'xlsx') {
@@ -181,9 +181,9 @@ const exportVisitors = asyncHandler(async (req, res) => {
       { header: 'City', key: 'city', width: 16 },
       { header: 'No. of Attendees', key: 'numberOfAttendees', width: 14 },
       { header: 'Email Status', key: 'emailStatus', width: 14 },
+      { header: 'Registered On', key: 'createdAt', width: 20 },
       { header: 'Checked In', key: 'checkedIn', width: 12 },
       { header: 'Checked In At', key: 'checkedInAt', width: 20 },
-      { header: 'Registered On', key: 'createdAt', width: 20 },
     ];
 
     const headerRow = sheet.getRow(1);
@@ -216,9 +216,9 @@ const exportVisitors = asyncHandler(async (req, res) => {
     { label: 'City', value: 'city' },
     { label: 'No. of Attendees', value: 'numberOfAttendees' },
     { label: 'Email Status', value: 'emailStatus' },
+    { label: 'Registered On', value: 'createdAt' },
     { label: 'Checked In', value: 'checkedIn' },
     { label: 'Checked In At', value: 'checkedInAt' },
-    { label: 'Registered On', value: 'createdAt' },
   ];
   const parser = new Parser({ fields });
   const csv = parser.parse(rows);
