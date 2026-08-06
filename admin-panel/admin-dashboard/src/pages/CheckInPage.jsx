@@ -100,65 +100,55 @@ export default function CheckInPage() {
   }, [cameraOpen]);
 
   return (
-    
-    <div className="mx-auto flex h-full w-full max-w-2xl min-h-0 flex-col">
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-shrink-0 flex-col items-center px-3 pt-3 pb-2 text-center sm:px-6 sm:pt-6 sm:pb-3">
-          <span className="relative mb-1.5 flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 sm:mb-3 sm:h-16 sm:w-16">
-            <ScanLine size={18} className="text-blue-600 sm:hidden" />
-            <ScanLine size={26} className="hidden text-blue-600 sm:block" />
+    <div className="mx-auto max-w-2xl">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex flex-col items-center px-4 pt-8 pb-5 text-center sm:px-6 sm:pt-10 sm:pb-6">
+          <span className="relative mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 sm:mb-4 sm:h-20 sm:w-20">
+            <ScanLine size={28} className="text-blue-600 sm:hidden" />
+            <ScanLine size={32} className="hidden text-blue-600 sm:block" />
             <span className="absolute -top-1 left-1 h-1.5 w-1.5 rounded-full bg-blue-200" />
             <span className="absolute -bottom-2 -right-1 h-1 w-1 rounded-full bg-blue-300" />
             <span className="absolute top-2 -right-3 h-1 w-1 rounded-full bg-blue-200" />
           </span>
-          <h1 className="text-base font-bold text-brand-navyDark sm:text-xl">Gate Check-in</h1>
-          <p className="mt-0.5 max-w-md text-[11px] text-slate-500 sm:text-sm">
+          <h1 className="text-xl font-bold text-brand-navyDark sm:text-2xl">Gate Check-in</h1>
+          <p className="mt-2 max-w-md text-sm text-slate-500">
             Scan a visitor's QR pass using your device camera to check them in.
           </p>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col px-3 pb-2 sm:px-6 sm:pb-4">
-          <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/30 p-3 sm:p-6">
-            <span className="absolute left-2 top-2 h-4 w-4 rounded-tl-lg border-l-2 border-t-2 border-blue-500 sm:left-3 sm:top-3 sm:h-5 sm:w-5" />
-            <span className="absolute right-2 top-2 h-4 w-4 rounded-tr-lg border-r-2 border-t-2 border-blue-500 sm:right-3 sm:top-3 sm:h-5 sm:w-5" />
-            <span className="absolute bottom-2 left-2 h-4 w-4 rounded-bl-lg border-b-2 border-l-2 border-blue-500 sm:bottom-3 sm:left-3 sm:h-5 sm:w-5" />
-            <span className="absolute bottom-2 right-2 h-4 w-4 rounded-br-lg border-b-2 border-r-2 border-blue-500 sm:bottom-3 sm:right-3 sm:h-5 sm:w-5" />
+        <div className="px-4 pb-5 sm:px-6 sm:pb-6">
+          <div className="relative flex min-h-[280px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/30 p-5 sm:min-h-[320px] sm:p-6">
+            <span className="absolute left-3 top-3 h-5 w-5 rounded-tl-lg border-l-2 border-t-2 border-blue-500" />
+            <span className="absolute right-3 top-3 h-5 w-5 rounded-tr-lg border-r-2 border-t-2 border-blue-500" />
+            <span className="absolute bottom-3 left-3 h-5 w-5 rounded-bl-lg border-b-2 border-l-2 border-blue-500" />
+            <span className="absolute bottom-3 right-3 h-5 w-5 rounded-br-lg border-b-2 border-r-2 border-blue-500" />
 
             {cameraOpen ? (
-              <div
-                id={SCANNER_ELEMENT_ID}
-                className="aspect-square w-full max-w-[220px] overflow-hidden rounded-xl sm:max-w-xs"
-              />
+              <div id={SCANNER_ELEMENT_ID} className="w-full max-w-xs overflow-hidden rounded-xl" />
             ) : (
               <>
-                <span className="mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-500 sm:mb-4 sm:h-16 sm:w-16">
+                <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-blue-500 sm:mb-4 sm:h-16 sm:w-16">
                   {submitting ? (
-                    <Loader2 size={20} className="animate-spin sm:hidden" />
+                    <Loader2 size={24} className="animate-spin" />
                   ) : (
-                    <Camera size={20} className="sm:hidden" />
-                  )}
-                  {submitting ? (
-                    <Loader2 size={24} className="hidden animate-spin sm:block" />
-                  ) : (
-                    <Camera size={24} className="hidden sm:block" />
+                    <Camera size={24} />
                   )}
                 </span>
-                <h3 className="text-xs font-bold text-brand-navyDark sm:text-base">
+                <h3 className="text-sm font-bold text-brand-navyDark sm:text-base">
                   {submitting ? 'Verifying...' : 'Ready to Scan'}
                 </h3>
                 {!submitting && (
-                  <p className="mt-1 text-center text-[11px] text-slate-500 sm:text-sm">
+                  <p className="mt-1 text-center text-xs text-slate-500 sm:text-sm">
                     Tap "Scan with Camera" and position the
-                    <br className="hidden sm:block" /> QR code within the frame
+                    <br />
+                    QR code within the frame
                   </p>
                 )}
               </>
             )}
 
             {cameraError && (
-              <p className="mt-2 text-center text-[11px] font-medium text-red-500 sm:text-xs">
-                {cameraError}
-              </p>
+              <p className="mt-3 text-center text-xs font-medium text-red-500">{cameraError}</p>
             )}
           </div>
 
@@ -166,7 +156,7 @@ export default function CheckInPage() {
             type="button"
             onClick={cameraOpen ? stopCamera : startCamera}
             disabled={submitting}
-            className="mt-3 flex w-full flex-shrink-0 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer sm:py-3 sm:text-sm"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           >
             {submitting ? (
               <>
@@ -185,9 +175,9 @@ export default function CheckInPage() {
         </div>
 
         {result && (
-          <div className="flex-shrink-0 px-3 pb-2 sm:px-6 sm:pb-4">
+          <div className="px-4 pb-5 sm:px-6 sm:pb-6">
             <div
-              className={`flex items-start gap-2.5 rounded-xl p-3 sm:gap-3 sm:p-4 ${
+              className={`flex items-start gap-3 rounded-xl p-4 ${
                 result.type === 'error'
                   ? 'bg-red-50'
                   : result.type === 'already'
@@ -196,18 +186,18 @@ export default function CheckInPage() {
               }`}
             >
               {result.type === 'error' ? (
-                <AlertTriangle className="mt-0.5 flex-shrink-0 text-red-500" size={18} />
+                <AlertTriangle className="mt-0.5 flex-shrink-0 text-red-500" size={20} />
               ) : (
                 <CheckCircle2
                   className={`mt-0.5 flex-shrink-0 ${
                     result.type === 'already' ? 'text-amber-500' : 'text-emerald-500'
                   }`}
-                  size={18}
+                  size={20}
                 />
               )}
               <div className="min-w-0">
                 <p
-                  className={`text-xs font-medium sm:text-sm ${
+                  className={`text-sm font-medium ${
                     result.type === 'error'
                       ? 'text-red-700'
                       : result.type === 'already'
@@ -218,7 +208,7 @@ export default function CheckInPage() {
                   {result.message}
                 </p>
                 {result.visitor && (
-                  <p className="mt-1 truncate text-[11px] text-slate-500 sm:text-xs">
+                  <p className="mt-1 truncate text-xs text-slate-500">
                     {result.visitor.registrationId} · {result.visitor.email}
                   </p>
                 )}
@@ -227,13 +217,12 @@ export default function CheckInPage() {
           </div>
         )}
 
-        <div className="mx-3 mb-2.5 flex flex-shrink-0 items-center justify-between gap-2.5 rounded-xl bg-blue-50/70 px-3 py-2.5 sm:mx-6 sm:mb-5 sm:gap-4 sm:px-5 sm:py-4">
-          <div className="flex items-start gap-2.5 sm:gap-3">
-            <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-white sm:h-7 sm:w-7">
-              <Info size={12} className="sm:hidden" />
-              <Info size={14} className="hidden sm:block" />
+        <div className="mx-4 mb-5 flex items-center justify-between gap-3 rounded-xl bg-blue-50/70 px-4 py-3.5 sm:mx-6 sm:mb-6 sm:gap-4 sm:px-5 sm:py-4">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 text-white">
+              <Info size={14} />
             </span>
-            <p className="text-[11px] text-slate-600 sm:text-sm">
+            <p className="text-xs text-slate-600 sm:text-sm">
               Tip: Hold the QR pass steady within the frame. Check-in happens automatically
               as soon as the code is recognized.
             </p>
