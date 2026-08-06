@@ -93,7 +93,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     clearSession();
     setAdmin(null);
-    toast.success('Logout successful.');
+    toast.success('Logout successful');
   }, []);
 
   return (

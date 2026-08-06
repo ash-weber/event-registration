@@ -470,25 +470,28 @@ export default function VisitorsListPage() {
         </div>
       )}
 
-     
+      
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-b-lg border border-slate-100 bg-white shadow-sm">
         {loading && (
-          <div className="py-8 text-center">
-            <Loader2 className="mx-auto animate-spin" style={{ color: NAVY }} size={20} />
+          <div className="flex min-h-0 flex-1 items-center justify-center py-8 text-center">
+            <Loader2 className="animate-spin" style={{ color: NAVY }} size={20} />
           </div>
         )}
 
         {!loading && error && (
-          <p className="py-6 text-center text-xs text-red-500">{error}</p>
+          <div className="flex min-h-0 flex-1 items-center justify-center py-6 text-center">
+            <p className="text-xs text-red-500">{error}</p>
+          </div>
         )}
 
         {!loading && !error && visibleVisitors.length === 0 && (
-          <div className="py-8 text-center text-xs text-slate-400">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center py-8 text-center text-xs text-slate-400">
             <Inbox className="mx-auto mb-2" size={20} />
             No visitors found.
           </div>
         )}
 
+     
         {!loading && !error && visibleVisitors.length > 0 && (
           <div className="min-h-0 flex-1 divide-y divide-slate-100 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:hidden">
             {visibleVisitors.map((v, idx) => (
