@@ -9,7 +9,6 @@ import {
   Inbox,
   Users,
   CheckCircle2,
-  Clock,
   XCircle,
   Download,
   Eye,
@@ -51,7 +50,6 @@ const STATUS_OPTIONS = [
   { label: 'All Visitors', value: 'all', icon: Users, color: NAVY },
   { label: 'Checked In', value: 'checkedIn', icon: CheckCircle2, color: '#16a34a' },
   { label: 'Not Checked In', value: 'notCheckedIn', icon: XCircle, color: '#dc2626' },
-  { label: 'Pending Email', value: 'pending', icon: Clock, color: '#d97706' },
 ];
 
 export default function VisitorsListPage() {
