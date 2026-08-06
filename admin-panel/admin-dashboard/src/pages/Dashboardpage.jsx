@@ -126,6 +126,24 @@ export default function DashboardPage() {
   })();
   const todayCount = chartData.find((d) => d.date === todayKey)?.count ?? 0;
 
+  const chartMaxValue = chartData.reduce((max, d) => Math.max(max, d.count || 0), 0);
+
+  function niceStep(roughStep) {
+    if (roughStep <= 0) return 1;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
+    const normalized = roughStep / magnitude;
+    let niceNormalized;
+    if (normalized <= 1) niceNormalized = 1;
+    else if (normalized <= 2) niceNormalized = 2;
+    else if (normalized <= 5) niceNormalized = 5;
+    else niceNormalized = 10;
+    return niceNormalized * magnitude;
+  }
+
+  const yAxisStep = niceStep(Math.max(1, chartMaxValue * 1.2) / 5);
+  const yAxisTicks = Array.from({ length: 6 }, (_, i) => i * yAxisStep);
+  const yAxisMax = yAxisTicks[yAxisTicks.length - 1];
+
   // "Pending" card removed as requested — only 3 cards now.
   const statCards = stats && checkedInCount !== null
     ? [
@@ -216,14 +234,15 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="h-56 w-full sm:h-64 lg:h-72">
+      
+        <div className="h-64 w-full pt-4 sm:h-72 lg:h-80">
           {loading ? (
             <div className="flex h-full items-center justify-center">
               <Loader2 className="animate-spin text-brand-navy" size={26} />
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 28, right: 10, left: -10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="regGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#2f6fed" stopOpacity={0.4} />
@@ -244,7 +263,10 @@ export default function DashboardPage() {
                   axisLine={false}
                   tickLine={false}
                   allowDecimals={false}
-                  width={30}
+                  width={36}
+                  domain={[0, yAxisMax]}
+                  ticks={yAxisTicks}
+                  
                 />
                 <Tooltip
                   contentStyle={{
