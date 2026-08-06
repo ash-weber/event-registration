@@ -3,7 +3,6 @@ import {
   Users,
   CheckCircle2,
   QrCode,
-  Clock,
   ArrowRight,
   Loader2,
   Eye,
@@ -52,7 +51,6 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // --- horizontal mouse-drag / wheel scrolling for the recent-registrations table ---
   const tableScrollRef = useRef(null);
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, scrollLeft: 0 });
@@ -92,10 +90,9 @@ export default function DashboardPage() {
     const el = tableScrollRef.current;
     if (!el) return;
     if (el.scrollWidth <= el.clientWidth) return;
-    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-      el.scrollLeft += e.deltaY;
-      e.preventDefault();
-    }
+    e.preventDefault();
+    e.stopPropagation();
+    el.scrollLeft += e.deltaY !== 0 ? e.deltaY : e.deltaX;
   }, []);
 
   const handleTableMouseDown = useCallback((e) => {
@@ -129,6 +126,7 @@ export default function DashboardPage() {
   })();
   const todayCount = chartData.find((d) => d.date === todayKey)?.count ?? 0;
 
+  // "Pending" card removed as requested — only 3 cards now.
   const statCards = stats && checkedInCount !== null
     ? [
         {
@@ -155,14 +153,6 @@ export default function DashboardPage() {
           iconBg: 'bg-amber-50',
           iconColor: 'text-amber-500',
         },
-        {
-          label: 'Pending',
-          value: stats.pending.value,
-          change: stats.pending.change,
-          icon: Clock,
-          iconBg: 'bg-violet-50',
-          iconColor: 'text-violet-500',
-        },
       ]
     : [];
 
@@ -172,9 +162,9 @@ export default function DashboardPage() {
         <div className="mb-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
       )}
 
-      <div className="mb-6 grid grid-cols-1 gap-4 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 xs:grid-cols-3 sm:grid-cols-3">
         {loading && !stats
-          ? Array.from({ length: 4 }).map((_, i) => (
+          ? Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
                 className="flex h-[104px] items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm"
@@ -345,24 +335,25 @@ export default function DashboardPage() {
               onMouseMove={handleTableMouseMove}
               onMouseUp={stopTableDrag}
               onMouseLeave={stopTableDrag}
-              className={`hidden overflow-x-auto rounded-lg border border-slate-100 sm:block
-                [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-slate-100
+              style={{ overscrollBehavior: 'contain', touchAction: 'pan-x pan-y', maxHeight: '420px' }}
+              className={`hidden overflow-auto rounded-lg border border-slate-100 sm:block
+                [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-100
                 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300
                 hover:[&::-webkit-scrollbar-thumb]:bg-slate-400
                 [scrollbar-width:thin] [scrollbar-color:#cbd5e1_#f1f5f9]
                 ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
             >
-              <table className="w-full text-left text-sm" style={{ minWidth: '760px' }}>
+              <table className="border-separate text-left text-sm" style={{ width: 'max-content', minWidth: '100%', borderSpacing: 0 }}>
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                    <th className="px-5 py-3 font-semibold sm:px-6">ID</th>
-                    <th className="px-5 py-3 font-semibold sm:px-6">Name</th>
-                    <th className="px-5 py-3 font-semibold sm:px-6">Email</th>
-                    <th className="px-5 py-3 font-semibold sm:px-6">Mobile</th>
-                    <th className="px-5 py-3 font-semibold sm:px-6">Date</th>
-                    <th className="px-5 py-3 font-semibold sm:px-6">QR Status</th>
-                    <th className="px-5 py-3 font-semibold sm:px-6">Status</th>
-                    <th className="px-5 py-3 font-semibold sm:px-6">Action</th>
+                  <tr className="text-xs uppercase tracking-wide text-white">
+                    <th className="sticky top-0 z-20 border-b-2 px-5 py-3.5 font-semibold sm:px-6" style={{ backgroundColor: '#1a3a6e', borderColor: '#0f2650' }}>ID</th>
+                    <th className="sticky top-0 z-20 border-b-2 px-5 py-3.5 font-semibold sm:px-6" style={{ backgroundColor: '#1a3a6e', borderColor: '#0f2650' }}>Name</th>
+                    <th className="sticky top-0 z-20 border-b-2 px-5 py-3.5 font-semibold sm:px-6" style={{ backgroundColor: '#1a3a6e', borderColor: '#0f2650' }}>Email</th>
+                    <th className="sticky top-0 z-20 border-b-2 px-5 py-3.5 font-semibold sm:px-6" style={{ backgroundColor: '#1a3a6e', borderColor: '#0f2650' }}>Mobile</th>
+                    <th className="sticky top-0 z-20 border-b-2 px-5 py-3.5 font-semibold sm:px-6" style={{ backgroundColor: '#1a3a6e', borderColor: '#0f2650' }}>Date</th>
+                    <th className="sticky top-0 z-20 border-b-2 px-5 py-3.5 font-semibold sm:px-6" style={{ backgroundColor: '#1a3a6e', borderColor: '#0f2650' }}>QR Status</th>
+                    <th className="sticky top-0 z-20 border-b-2 px-5 py-3.5 font-semibold sm:px-6" style={{ backgroundColor: '#1a3a6e', borderColor: '#0f2650' }}>Status</th>
+                    <th className="sticky top-0 z-20 border-b-2 px-5 py-3.5 font-semibold sm:px-6" style={{ backgroundColor: '#1a3a6e', borderColor: '#0f2650' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">

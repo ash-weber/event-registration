@@ -18,7 +18,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import api from '../api/axios';
-import { EmailStatusBadge, CheckInBadge } from '../components/StatusBadge';
+import { CheckInBadge } from '../components/StatusBadge';
 import VisitorDetailModal from '../components/VisitorDetailModal';
 
 const LIMIT = 10;
@@ -76,7 +76,6 @@ export default function VisitorsListPage() {
   const [exporting, setExporting] = useState(null);
   const exportRef = useRef(null);
 
-  // --- horizontal mouse-drag / wheel scrolling for the desktop table ---
   const tableScrollRef = useRef(null);
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, scrollLeft: 0 });
@@ -109,12 +108,10 @@ export default function VisitorsListPage() {
     try {
       const { all, total: totalVisitors } = await fetchAllVisitors(api);
       const checkedInCount = all.filter((v) => v.checkedIn).length;
-      const pendingCount = all.filter((v) => v.emailStatus === 'PENDING').length;
 
       setStats({
         totalVisitors: { value: totalVisitors },
         thisEvent: { value: checkedInCount },
-        pending: { value: pendingCount },
       });
     } catch {
     } finally {
@@ -126,7 +123,6 @@ export default function VisitorsListPage() {
     fetchStats();
   }, [fetchStats]);
 
-  // debounce search
   useEffect(() => {
     const handle = setTimeout(() => {
       setPage(1);
@@ -135,7 +131,6 @@ export default function VisitorsListPage() {
     return () => clearTimeout(handle);
   }, [search]);
 
-  // refetch when page changes
   useEffect(() => {
     fetchVisitors({ page, search, status: statusFilter.value });
   }, [page]);
@@ -154,14 +149,14 @@ export default function VisitorsListPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  
   const handleTableWheel = useCallback((e) => {
     const el = tableScrollRef.current;
     if (!el) return;
     if (el.scrollWidth <= el.clientWidth) return;
-    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-      el.scrollLeft += e.deltaY;
-      e.preventDefault();
-    }
+    e.preventDefault();
+    e.stopPropagation();
+    el.scrollLeft += e.deltaY !== 0 ? e.deltaY : e.deltaX;
   }, []);
 
   const handleTableMouseDown = useCallback((e) => {
@@ -203,13 +198,6 @@ export default function VisitorsListPage() {
           icon: CheckCircle2,
           bg: `${GREEN}22`,
           color: '#5c9e1f',
-        },
-        {
-          label: 'Pending Email',
-          value: stats.pending.value,
-          icon: Clock,
-          bg: '#fef3c7',
-          color: '#d97706',
         },
         {
           label: 'Not Checked In',
@@ -309,9 +297,9 @@ export default function VisitorsListPage() {
         </p>
       </div>
 
-      <div className="grid flex-shrink-0 grid-cols-2 gap-2 sm:gap-2.5 lg:grid-cols-4">
+      <div className="grid flex-shrink-0 grid-cols-3 gap-2 sm:gap-2.5">
         {statsLoading && !stats
-          ? Array.from({ length: 4 }).map((_, i) => (
+          ? Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
                 className="flex h-[54px] items-center justify-center rounded-lg border border-slate-100 bg-white shadow-sm sm:h-[60px]"
@@ -482,199 +470,186 @@ export default function VisitorsListPage() {
         </div>
       )}
 
+     
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-b-lg border border-slate-100 bg-white shadow-sm">
-        <div className="min-h-0 flex-1 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {loading && (
-            <div className="py-8 text-center">
-              <Loader2 className="mx-auto animate-spin" style={{ color: NAVY }} size={20} />
-            </div>
-          )}
+        {loading && (
+          <div className="py-8 text-center">
+            <Loader2 className="mx-auto animate-spin" style={{ color: NAVY }} size={20} />
+          </div>
+        )}
 
-          {!loading && error && (
-            <p className="py-6 text-center text-xs text-red-500">{error}</p>
-          )}
+        {!loading && error && (
+          <p className="py-6 text-center text-xs text-red-500">{error}</p>
+        )}
 
-          {!loading && !error && visibleVisitors.length === 0 && (
-            <div className="py-8 text-center text-xs text-slate-400">
-              <Inbox className="mx-auto mb-2" size={20} />
-              No visitors found.
-            </div>
-          )}
+        {!loading && !error && visibleVisitors.length === 0 && (
+          <div className="py-8 text-center text-xs text-slate-400">
+            <Inbox className="mx-auto mb-2" size={20} />
+            No visitors found.
+          </div>
+        )}
 
-          {!loading && !error && visibleVisitors.length > 0 && (
-            <div className="divide-y divide-slate-100 sm:hidden">
-              {visibleVisitors.map((v, idx) => (
-                <div key={v.id} className="px-3 py-2.5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="flex items-center gap-1.5 truncate text-xs font-semibold" style={{ color: NAVY }}>
-                        <span className="text-[10px] font-normal text-slate-400">
-                          #{(page - 1) * LIMIT + idx + 1}
-                        </span>
-                        {v.fullName}
-                      </p>
-                      <p className="truncate text-[11px] text-slate-500">{v.email}</p>
-                      <p className="mt-0.5 text-[11px] text-slate-400">{v.mobileNumber}</p>
-                      {(v.company || v.city) && (
-                        <p className="mt-0.5 truncate text-[11px] text-slate-400">
-                          {[v.company, v.city].filter(Boolean).join(' · ')}
-                        </p>
-                      )}
-                      <p className="mt-0.5 text-[11px] text-slate-400">
-                        {formatRegisteredDate(v.createdAt)} · {formatRegisteredTime(v.createdAt)}
-                        {v.numberOfAttendees ? ` · ${v.numberOfAttendees} attending` : ''}
-                      </p>
-                    </div>
-                    <span className="flex-shrink-0 whitespace-nowrap text-[10px] font-medium text-slate-400">
-                      {v.registrationId}
-                    </span>
+        {!loading && !error && visibleVisitors.length > 0 && (
+          <div className="min-h-0 flex-1 divide-y divide-slate-100 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:hidden">
+            {visibleVisitors.map((v, idx) => (
+              <div key={v.id} className="px-3 py-2.5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-1.5 truncate text-xs font-semibold" style={{ color: NAVY }}>
+                      <span className="text-[10px] font-normal text-slate-400">
+                        #{(page - 1) * LIMIT + idx + 1}
+                      </span>
+                      {v.fullName}
+                    </p>
+                    <p className="truncate text-[11px] text-slate-500">{v.email}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-400">{v.mobileNumber}</p>
+                    {v.company && (
+                      <p className="mt-0.5 truncate text-[11px] text-slate-400">{v.company}</p>
+                    )}
+                    <p className="mt-0.5 text-[11px] text-slate-400">
+                      {formatRegisteredDate(v.createdAt)} · {formatRegisteredTime(v.createdAt)}
+                      {v.numberOfAttendees ? ` · ${v.numberOfAttendees} attending` : ''}
+                    </p>
                   </div>
+                  <span className="flex-shrink-0 whitespace-nowrap text-[10px] font-medium text-slate-400">
+                    {v.registrationId}
+                  </span>
+                </div>
 
-                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <EmailStatusBadge status={v.emailStatus} />
-                      <CheckInBadge checkedIn={v.checkedIn} />
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={() => setActiveVisitorId(v.id)}
-                        className="flex h-7 w-7 items-center justify-center rounded-md border cursor-pointer"
-                        style={{ borderColor: `${GREEN}88`, color: '#5c9e1f' }}
-                        aria-label={`View ${v.fullName}`}
-                      >
-                        <Eye size={13} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => handleDownload(v.id, e)}
-                        disabled={downloadingId === v.id}
-                        className="flex h-7 w-7 items-center justify-center rounded-md border disabled:opacity-50 cursor-pointer"
-                        style={{ borderColor: `${NAVY}55`, color: NAVY }}
-                        aria-label={`Download QR for ${v.fullName}`}
-                      >
-                        {downloadingId === v.id ? (
-                          <Loader2 size={13} className="animate-spin" />
-                        ) : (
-                          <Download size={13} />
-                        )}
-                      </button>
-                    </div>
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <CheckInBadge checkedIn={v.checkedIn} />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setActiveVisitorId(v.id)}
+                      className="flex h-7 w-7 items-center justify-center rounded-md border cursor-pointer"
+                      style={{ borderColor: `${GREEN}88`, color: '#5c9e1f' }}
+                      aria-label={`View ${v.fullName}`}
+                    >
+                      <Eye size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDownload(v.id, e)}
+                      disabled={downloadingId === v.id}
+                      className="flex h-7 w-7 items-center justify-center rounded-md border disabled:opacity-50 cursor-pointer"
+                      style={{ borderColor: `${NAVY}55`, color: NAVY }}
+                      aria-label={`Download QR for ${v.fullName}`}
+                    >
+                      {downloadingId === v.id ? (
+                        <Loader2 size={13} className="animate-spin" />
+                      ) : (
+                        <Download size={13} />
+                      )}
+                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ))}
+          </div>
+        )}
 
-          {!loading && !error && visibleVisitors.length > 0 && (
-            <div
-              ref={tableScrollRef}
-              onWheel={handleTableWheel}
-              onMouseDown={handleTableMouseDown}
-              onMouseMove={handleTableMouseMove}
-              onMouseUp={stopTableDrag}
-              onMouseLeave={stopTableDrag}
-              className={`hidden overflow-x-auto sm:block
-                [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-slate-100
-                [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300
-                hover:[&::-webkit-scrollbar-thumb]:bg-slate-400
-                [scrollbar-width:thin] [scrollbar-color:#cbd5e1_#f1f5f9]
-                ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
+     
+        {!loading && !error && visibleVisitors.length > 0 && (
+          <div
+            ref={tableScrollRef}
+            onWheel={handleTableWheel}
+            onMouseDown={handleTableMouseDown}
+            onMouseMove={handleTableMouseMove}
+            onMouseUp={stopTableDrag}
+            onMouseLeave={stopTableDrag}
+            style={{ overscrollBehavior: 'contain', touchAction: 'pan-x pan-y' }}
+            className={`hidden min-h-0 flex-1 overflow-auto sm:block
+              [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-100
+              [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300
+              hover:[&::-webkit-scrollbar-thumb]:bg-slate-400
+              [scrollbar-width:thin] [scrollbar-color:#cbd5e1_#f1f5f9]
+              ${isDragging ? 'cursor-grabbing select-none' : 'cursor-grab'}`}
+          >
+            <table
+              className="border-separate text-left text-xs"
+              style={{ width: '100%', minWidth: 'max-content', borderSpacing: 0 }}
             >
-              <table className="text-left text-xs" style={{ width: 'max-content' }}>
-                <thead className="sticky top-0 z-10">
-                  <tr className="border-b border-slate-100 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-500">
-                    <th className="px-3 py-2 font-semibold">S.No</th>
-                    <th className="px-3 py-2 font-semibold">ID</th>
-                    <th className="px-3 py-2 font-semibold">Name</th>
-                    <th className="px-3 py-2 font-semibold">Email</th>
-                    <th className="px-3 py-2 font-semibold">Mobile</th>
-                    <th className="w-[140px] px-3 py-2 font-semibold">Company</th>
-                    <th className="w-[100px] px-3 py-2 font-semibold">City</th>
-                    <th className="px-3 py-2 font-semibold">Attendance</th>
-                    <th className="px-3 py-2 font-semibold">Registered</th>
-                    <th className="px-3 py-2 font-semibold">Reg. Time</th>
-                    <th className="px-3 py-2 font-semibold">Email</th>
-                    <th className="px-3 py-2 font-semibold">Check-in</th>
-                    <th className="px-3 py-2 font-semibold">Action</th>
+              <thead>
+                <tr className="text-[10px] uppercase tracking-wide text-white">
+                  <th className="sticky top-0 z-20 px-3 py-2.5 font-semibold shadow-sm" style={{ backgroundColor: NAVY }}>S.No</th>
+                  <th className="sticky top-0 z-20 px-3 py-2.5 font-semibold shadow-sm" style={{ backgroundColor: NAVY }}>ID</th>
+                  <th className="sticky top-0 z-20 px-3 py-2.5 font-semibold shadow-sm" style={{ backgroundColor: NAVY }}>Name</th>
+                  <th className="sticky top-0 z-20 px-3 py-2.5 font-semibold shadow-sm" style={{ backgroundColor: NAVY }}>Mobile</th>
+                  <th className="sticky top-0 z-20 w-[140px] px-3 py-2.5 font-semibold shadow-sm" style={{ backgroundColor: NAVY }}>Company</th>
+                  <th className="sticky top-0 z-20 px-3 py-2.5 font-semibold shadow-sm" style={{ backgroundColor: NAVY }}>No. of Attendance</th>
+                  <th className="sticky top-0 z-20 px-3 py-2.5 font-semibold shadow-sm" style={{ backgroundColor: NAVY }}>Registered</th>
+                  <th className="sticky top-0 z-20 px-3 py-2.5 font-semibold shadow-sm" style={{ backgroundColor: NAVY }}>Reg. Time</th>
+                  <th className="sticky top-0 z-20 px-3 py-2.5 font-semibold shadow-sm" style={{ backgroundColor: NAVY }}>Check-in</th>
+                  <th className="sticky top-0 z-20 px-3 py-2.5 font-semibold shadow-sm" style={{ backgroundColor: NAVY }}>Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {visibleVisitors.map((v, idx) => (
+                  <tr key={v.id} className="hover:bg-slate-50">
+                    <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">
+                      {(page - 1) * LIMIT + idx + 1}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-1.5 text-[11px] font-medium" style={{ color: NAVY }}>
+                      {v.registrationId}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-1.5 text-[11px]">{v.fullName}</td>
+                    <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">{v.mobileNumber}</td>
+
+                    <td
+                      className="w-[140px] max-w-[140px] truncate px-3 py-1.5 text-[11px] text-slate-500"
+                      title={v.company || ''}
+                    >
+                      {v.company || '—'}
+                    </td>
+
+                    <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">
+                      {v.numberOfAttendees ?? '—'}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">
+                      {formatRegisteredDate(v.createdAt)}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">
+                      {formatRegisteredTime(v.createdAt)}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-1.5">
+                      <CheckInBadge checkedIn={v.checkedIn} />
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setActiveVisitorId(v.id)}
+                          className="flex h-6 w-6 items-center justify-center rounded-md border cursor-pointer"
+                          style={{ borderColor: `${GREEN}88`, color: '#5c9e1f' }}
+                          aria-label={`View ${v.fullName}`}
+                        >
+                          <Eye size={12} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleDownload(v.id, e)}
+                          disabled={downloadingId === v.id}
+                          className="flex h-6 w-6 items-center justify-center rounded-md border disabled:opacity-50 cursor-pointer"
+                          style={{ borderColor: `${NAVY}55`, color: NAVY }}
+                          aria-label={`Download QR for ${v.fullName}`}
+                        >
+                          {downloadingId === v.id ? (
+                            <Loader2 size={12} className="animate-spin" />
+                          ) : (
+                            <Download size={12} />
+                          )}
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {visibleVisitors.map((v, idx) => (
-                    <tr key={v.id} className="hover:bg-slate-50">
-                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">
-                        {(page - 1) * LIMIT + idx + 1}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] font-medium" style={{ color: NAVY }}>
-                        {v.registrationId}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px]">{v.fullName}</td>
-                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">{v.email}</td>
-                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">{v.mobileNumber}</td>
-
-                      <td
-                        className="w-[140px] max-w-[140px] truncate px-3 py-1.5 text-[11px] text-slate-500"
-                        title={v.company || ''}
-                      >
-                        {v.company || '—'}
-                      </td>
-
-                      <td
-                        className="w-[100px] max-w-[100px] truncate px-3 py-1.5 text-[11px] text-slate-500"
-                        title={v.city || ''}
-                      >
-                        {v.city || '—'}
-                      </td>
-
-                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">
-                        {v.numberOfAttendees ?? '—'}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">
-                        {formatRegisteredDate(v.createdAt)}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-1.5 text-[11px] text-slate-500">
-                        {formatRegisteredTime(v.createdAt)}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-1.5">
-                        <EmailStatusBadge status={v.emailStatus} />
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-1.5">
-                        <CheckInBadge checkedIn={v.checkedIn} />
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => setActiveVisitorId(v.id)}
-                            className="flex h-6 w-6 items-center justify-center rounded-md border cursor-pointer"
-                            style={{ borderColor: `${GREEN}88`, color: '#5c9e1f' }}
-                            aria-label={`View ${v.fullName}`}
-                          >
-                            <Eye size={12} />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => handleDownload(v.id, e)}
-                            disabled={downloadingId === v.id}
-                            className="flex h-6 w-6 items-center justify-center rounded-md border disabled:opacity-50 cursor-pointer"
-                            style={{ borderColor: `${NAVY}55`, color: NAVY }}
-                            aria-label={`Download QR for ${v.fullName}`}
-                          >
-                            {downloadingId === v.id ? (
-                              <Loader2 size={12} className="animate-spin" />
-                            ) : (
-                              <Download size={12} />
-                            )}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         <div className="flex flex-shrink-0 flex-col gap-2 border-t border-slate-100 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-[10px] text-slate-500">

@@ -362,9 +362,11 @@ export default function RegistrationForm({ onSuccess }) {
             )}
           </button>
 
-          <p className="flex items-start justify-center gap-1.5 text-center text-[11px] text-slate-400">
-            <ShieldCheck size={12} className="mt-[3px] flex-shrink-0 text-brand-lime" />
-            <span>Your registration is secure. We&apos;ll never share your information.</span>
+          <p className="flex items-start justify-center gap-1.5 text-[11px] text-slate-400 px-4">
+            <ShieldCheck size={12} className="mt-0.5 flex-shrink-0 text-brand-lime" />
+            <span className="text-left leading-snug">
+              Your registration is secure. We&apos;ll never share your information.
+            </span>
           </p>
         </form>
       </div>

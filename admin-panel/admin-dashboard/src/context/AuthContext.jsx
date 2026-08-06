@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import toast from 'react-hot-toast';
 import api from '../api/axios';
 
 const AuthContext = createContext(null);
@@ -82,7 +83,7 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password, remember = false) => {
     const res = await api.post('/admin/login', { email, password });
-    console.log('login response:', res.data); // TEMP: verify the actual shape, remove once confirmed
+    console.log('login response:', res.data); 
     const { token, admin: adminData } = res.data.data;
     saveSession(token, adminData, remember);
     setAdmin(adminData);
@@ -92,6 +93,7 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     clearSession();
     setAdmin(null);
+    toast.success('Logout successful.');
   }, []);
 
   return (

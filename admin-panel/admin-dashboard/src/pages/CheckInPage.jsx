@@ -1,9 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import {
   ScanLine,
-  Keyboard,
   Camera,
-  Send,
   CheckCircle2,
   AlertTriangle,
   Loader2,
@@ -16,15 +14,13 @@ import api from '../api/axios';
 const SCANNER_ELEMENT_ID = 'qr-camera-scanner';
 
 export default function CheckInPage() {
-  const [qrPayload, setQrPayload] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null); 
+  const [result, setResult] = useState(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState('');
-  const [activeTab, setActiveTab] = useState('scan'); 
-  const inputRef = useRef(null);
   const html5QrRef = useRef(null);
-  const scanningRef = useRef(false); 
+  const scanningRef = useRef(false);
+
   async function submitPayload(payload) {
     if (!payload.trim()) return;
 
@@ -43,21 +39,13 @@ export default function CheckInPage() {
         message: err.response?.data?.message || 'Check-in failed. Please try again.',
       });
     } finally {
-      setQrPayload('');
       setSubmitting(false);
-      inputRef.current?.focus();
     }
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    await submitPayload(qrPayload);
-  }
-
-
   function startCamera() {
     setCameraError('');
-    setActiveTab('scan');
+    setResult(null);
     setCameraOpen(true);
   }
 
@@ -67,17 +55,11 @@ export default function CheckInPage() {
       instance
         .stop()
         .then(() => instance.clear())
-        .catch(() => {
-        });
+        .catch(() => {});
       html5QrRef.current = null;
     }
     scanningRef.current = false;
     setCameraOpen(false);
-  }
-
-  function focusManualEntry() {
-    setActiveTab('paste');
-    inputRef.current?.focus();
   }
 
   useEffect(() => {
@@ -94,15 +76,13 @@ export default function CheckInPage() {
         if (scanningRef.current) return;
         scanningRef.current = true;
 
-        setQrPayload(decodedText);
         stopCamera();
         await submitPayload(decodedText);
       },
-      () => {
-      }
+      () => {}
     ).catch((err) => {
       setCameraError(
-        'Could not access camera. Please allow camera permission or use the input field instead.'
+        'Could not access camera. Please allow camera permission and try again.'
       );
       setCameraOpen(false);
       console.error('QR camera start failed:', err);
@@ -120,7 +100,7 @@ export default function CheckInPage() {
   }, [cameraOpen]);
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-2xl">
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-col items-center px-4 pt-8 pb-5 text-center sm:px-6 sm:pt-10 sm:pb-6">
           <span className="relative mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 sm:mb-4 sm:h-20 sm:w-20">
@@ -132,40 +112,12 @@ export default function CheckInPage() {
           </span>
           <h1 className="text-xl font-bold text-brand-navyDark sm:text-2xl">Gate Check-in</h1>
           <p className="mt-2 max-w-md text-sm text-slate-500">
-            Scan a visitor's QR pass with a handheld/USB scanner, your device camera, or paste the
-            QR payload below.
+            Scan a visitor's QR pass using your device camera to check them in.
           </p>
         </div>
 
-        <div className="px-4 sm:px-6">
-          <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-1.5">
-            <button
-              type="button"
-              onClick={startCamera}
-              className={`flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-semibold transition cursor-pointer sm:gap-2 sm:text-sm ${
-                activeTab === 'scan'
-                  ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <ScanLine size={16} /> <span className="truncate">Scan QR Code</span>
-            </button>
-            <button
-              type="button"
-              onClick={focusManualEntry}
-              className={`flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-semibold transition cursor-pointer sm:gap-2 sm:text-sm ${
-                activeTab === 'paste'
-                  ? 'bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-200'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <Keyboard size={16} /> <span className="truncate">Paste Payload</span>
-            </button>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 px-4 pb-5 pt-5 sm:gap-6 sm:px-6 sm:pb-6 sm:pt-6 md:grid-cols-[1fr_auto_1fr]">
-          <div className="relative flex min-h-[220px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/30 p-5 sm:min-h-[260px] sm:p-6">
+        <div className="px-4 pb-5 sm:px-6 sm:pb-6">
+          <div className="relative flex min-h-[280px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/30 p-5 sm:min-h-[320px] sm:p-6">
             <span className="absolute left-3 top-3 h-5 w-5 rounded-tl-lg border-l-2 border-t-2 border-blue-500" />
             <span className="absolute right-3 top-3 h-5 w-5 rounded-tr-lg border-r-2 border-t-2 border-blue-500" />
             <span className="absolute bottom-3 left-3 h-5 w-5 rounded-bl-lg border-b-2 border-l-2 border-blue-500" />
@@ -176,14 +128,22 @@ export default function CheckInPage() {
             ) : (
               <>
                 <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-blue-500 sm:mb-4 sm:h-16 sm:w-16">
-                  <Camera size={24} />
+                  {submitting ? (
+                    <Loader2 size={24} className="animate-spin" />
+                  ) : (
+                    <Camera size={24} />
+                  )}
                 </span>
-                <h3 className="text-sm font-bold text-brand-navyDark sm:text-base">Ready to Scan</h3>
-                <p className="mt-1 text-center text-xs text-slate-500 sm:text-sm">
-                  Position the QR code within the frame
-                  <br />
-                  to scan automatically
-                </p>
+                <h3 className="text-sm font-bold text-brand-navyDark sm:text-base">
+                  {submitting ? 'Verifying...' : 'Ready to Scan'}
+                </h3>
+                {!submitting && (
+                  <p className="mt-1 text-center text-xs text-slate-500 sm:text-sm">
+                    Tap "Scan with Camera" and position the
+                    <br />
+                    QR code within the frame
+                  </p>
+                )}
               </>
             )}
 
@@ -192,53 +152,27 @@ export default function CheckInPage() {
             )}
           </div>
 
-
-
-          <div className="flex flex-col justify-center">
-            <label htmlFor="qrPayload" className="mb-2 text-sm font-bold text-slate-700">
-              Or enter QR payload
-            </label>
-            <div className="relative mb-3">
-              <span className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center text-slate-400">
-                <ScanLine size={15} />
-              </span>
-              <input
-                ref={inputRef}
-                id="qrPayload"
-                value={qrPayload}
-                onChange={(e) => setQrPayload(e.target.value)}
-                onFocus={() => setActiveTab('paste')}
-                placeholder="Paste QR payload"
-                className="w-full rounded-lg border border-blue-200 bg-white py-3 pl-8 pr-2 text-[13px] leading-tight placeholder:truncate focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={submitting || !qrPayload.trim()}
-              className="mb-2 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" /> Verifying...
-                </>
-              ) : (
-                <>
-                  <Send size={16} /> Check-in Visitor
-                </>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={cameraOpen ? stopCamera : startCamera}
-              disabled={submitting}
-              className="flex items-center justify-center gap-2 rounded-lg border border-blue-300 bg-white py-3 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-            >
-              <Camera size={16} /> {cameraOpen ? 'Stop Camera' : 'Scan with Camera'}
-            </button>
-          </div>
-        </form>
+          <button
+            type="button"
+            onClick={cameraOpen ? stopCamera : startCamera}
+            disabled={submitting}
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+          >
+            {submitting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" /> Verifying...
+              </>
+            ) : cameraOpen ? (
+              <>
+                <Camera size={16} /> Stop Camera
+              </>
+            ) : (
+              <>
+                <Camera size={16} /> Scan with Camera
+              </>
+            )}
+          </button>
+        </div>
 
         {result && (
           <div className="px-4 pb-5 sm:px-6 sm:pb-6">
@@ -289,9 +223,8 @@ export default function CheckInPage() {
               <Info size={14} />
             </span>
             <p className="text-xs text-slate-600 sm:text-sm">
-              Tip: Most USB/Bluetooth barcode scanners act as a keyboard — just focus the input
-              field and scan. No scanner? Use "Scan with Camera" to scan with your device's camera
-              instead.
+              Tip: Hold the QR pass steady within the frame. Check-in happens automatically
+              as soon as the code is recognized.
             </p>
           </div>
           <span className="hidden h-14 w-10 flex-shrink-0 items-center justify-center rounded-xl border-4 border-slate-800 bg-white sm:flex">
