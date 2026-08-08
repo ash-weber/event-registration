@@ -242,7 +242,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 28, right: 10, left: -10, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 28, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="regGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#2f6fed" stopOpacity={0.4} />
@@ -263,10 +263,9 @@ export default function DashboardPage() {
                   axisLine={false}
                   tickLine={false}
                   allowDecimals={false}
-                  width={36}
+                  width={48}
                   domain={[0, yAxisMax]}
                   ticks={yAxisTicks}
-                  
                 />
                 <Tooltip
                   contentStyle={{

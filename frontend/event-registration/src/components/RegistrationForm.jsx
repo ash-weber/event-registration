@@ -125,6 +125,8 @@ export default function RegistrationForm({ onSuccess }) {
           setErrors((er) => ({ ...er, [field]: message }));
         }
         toast.error(message);
+      } else if (res?.status === 503) {
+        toast.error(res.data?.message || 'Server is busy right now. Please wait a moment and try again.');
       } else if (!res) {
         toast.error('Network error. Please check your connection and try again.');
       } else {
