@@ -50,7 +50,7 @@ function Badge() {
 }
 
 export default function HeroPanel({ children }) {
-  const eventName = import.meta.env.VITE_EVENT_NAME || 'INTERIO & EXTERIO EXPO';
+  const eventName = import.meta.env.VITE_EVENT_NAME || 'MEDICCON EXPO 2026';
   const words = eventName.split(' ');
   const line1 = words[0] ?? '';
   const line2 = words.length > 2 ? words.slice(1, -1).join(' ') : words[1] ?? '';

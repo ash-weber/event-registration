@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import html2canvas from 'html2canvas-pro';
 import buoyantLogo from '../assets/logo.png';
-import interioLogo from '../assets/Interio Logo.png';
+import interioLogo from '../assets/medicon_expo_logo.png';
 import ciconLogo from '../assets/Cicon logo.png';
 
 function BuoyantLogo() {
@@ -53,7 +53,7 @@ export default function QRPassCard({ data, onReset }) {
     designation,
     company = 'BUOYANT',
     registrationId = 'ATS26-000006',
-    eventDates = '07, 08 & 09\nAUGUST 2026',
+    eventDates = '20, 21 & 22\nNOVEMBER 2026',
     venue = 'Codissia Trade\nFair Centre,\nCoimbatore',
     qrCodeImage,
   } = data || {};
@@ -101,22 +101,22 @@ export default function QRPassCard({ data, onReset }) {
           <div className="h-6 w-full bg-rose-800 sm:h-8" />
 
           <div className="relative z-10 flex flex-col gap-3.5 px-3 pb-4 pt-3.5 sm:gap-6 sm:px-7 sm:pt-6">
-            <div className="flex items-center justify-between gap-2 sm:gap-3">
+            <div className="flex items-center justify-center gap-2 sm:gap-3">
               <img
                 src={interioLogo}
-                alt="Interio & Exterio Expo 2026"
+                alt="MEDICCON EXPO 2026"
                 className="h-14 w-auto flex-shrink-0 object-contain sm:h-24"
               />
-              <span className="h-12 w-px flex-shrink-0 bg-slate-200 sm:h-20" />
+              {/* <span className="h-12 w-px flex-shrink-0 bg-slate-200 sm:h-20" />
               <div className="flex flex-1 flex-col items-center gap-0.5 px-1 text-center">
                 <p className="text-xs font-extrabold leading-tight tracking-tight text-slate-900 sm:text-base">
-                  INTERIO <span className="text-amber-600">&amp; EXTERIO</span>
+                  MEDICCON
                 </p>
                 <p className="text-xs font-extrabold leading-tight tracking-tight text-slate-900 sm:text-base">
                   EXPO 2026
                 </p>
                 <p className="mt-0.5 text-[9px] font-bold tracking-wide text-rose-800 sm:text-xs">
-                  13<sup>TH</sup> EDITION
+                  4<sup>TH</sup> EDITION
                 </p>
               </div>
               <span className="h-12 w-px flex-shrink-0 bg-slate-200 sm:h-20" />
@@ -126,7 +126,7 @@ export default function QRPassCard({ data, onReset }) {
                   alt="CICON 2026 Civil Expo"
                   className="h-10 w-auto max-w-[110px] object-contain sm:h-16 sm:max-w-[170px]"
                 />
-              </div>
+              </div> */}
             </div>
 
             {/* FIX 2: center-align the content (icon + text) inside each date/venue cell */}

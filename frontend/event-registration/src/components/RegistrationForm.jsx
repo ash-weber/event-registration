@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { UserRound, Mail, Phone, Building2, IdCard, Users, Loader2, Leaf, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../api/axios';
-import logoImg from '../assets/logo.png';
+import logoImg from '../assets/medicon_expo_logo.png';
 import CityAutocomplete from './CityAutocomplete';
 
 const initialForm = {
@@ -162,13 +162,13 @@ export default function RegistrationForm({ onSuccess }) {
           <span className="flex h-14 sm:h-20 flex-shrink-0 items-center justify-center transition-transform duration-500 ease-out">
             <img
               src={logoImg}
-              alt="Interio & Exterio Expo Logo"
+              alt="MEDICCON EXPO 2026 Logo"
               className="h-full w-auto object-contain"
             />
           </span>
           <div className="min-w-0 text-center">
             <h2 className="text-lg sm:text-2xl font-extrabold leading-tight text-brand-navy break-words">
-              INTERIO & EXTERIO EXPO 2026
+              VISITORS REGISTRATION
             </h2>
             <p className="text-[11px] sm:text-sm text-slate-500 mt-0.5">
               Fill your details to register

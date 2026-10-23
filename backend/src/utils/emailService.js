@@ -3,9 +3,9 @@ const axios = require('axios');
 const ZEPTOMAIL_URL = process.env.ZEPTOMAIL_URL || 'https://api.zeptomail.in/v1.1/email';
 
 function buildConfirmationEmailHtml({ fullName, registrationId }) {
-  const eventName = process.env.EVENT_NAME || 'INTERIO & EXTERIO EXPO';
-  const eventDates = process.env.EVENT_DATES || '07, 08 & 09 August 2026';
-  const eventVenue = process.env.EVENT_VENUE || 'CODISSIA TRADE CENTRE';
+  const eventName = process.env.EVENT_NAME || 'MEDICCON EXPO 2026';
+  const eventDates = process.env.EVENT_DATES || '20, 21 & 22 NOVEMBER 2026';
+  const eventVenue = process.env.EVENT_VENUE || 'Codissia Trade Fair Centre';
 
   return `
   <div style="font-family: Arial, Helvetica, sans-serif; background:#EAF2FC; padding:24px;">

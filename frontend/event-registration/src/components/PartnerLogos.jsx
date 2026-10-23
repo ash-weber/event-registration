@@ -1,5 +1,5 @@
 import ciconLogo from '../assets/Cicon logo.png';
-import interioLogo from '../assets/Interio Logo.png';
+import interioLogo from '../assets/medicon_expo_logo.png';
 
 export default function PartnerLogos() {
   return (
@@ -14,7 +14,7 @@ export default function PartnerLogos() {
 
       <img
         src={interioLogo}
-        alt="Interio & Exterio Expo 2026, 13th Edition"
+        alt="MEDICCON EXPO 2026, Edition - 4"
         className="h-14 w-auto object-contain sm:h-16"
       />
     </div>
